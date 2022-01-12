@@ -14,4 +14,4 @@ all:
 #	${SIZE} -C --mcu=${MCU} ${TARGET}.elf
 
 clean:
-	rm -f *.c~ *.h~ *.o *.elf *.hex *.asm
+	rm -f *.c~ *.h~ *.o *.elf *.hex *.asm *.cod *.lst
