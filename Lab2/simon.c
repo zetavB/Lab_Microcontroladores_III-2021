@@ -47,8 +47,8 @@ int main(void)
   int velocidad = 2000;
   int valid = 1;
   int spot = 0;
-  int arrInput[10] = {0,0,0,0,0,0,0,0,0,0};
-  int arrGen[10] = {0,1,2,3,0,1,2,3,0,1};
+  int arrInput[10] = {0,0,0,0,0,0,0,0,0};
+  int arrGen[10] = {0,1,2,3,0,1,2,3,0};
   
   while (1) {
 	  
@@ -101,28 +101,33 @@ int main(void)
 	      {
 		arrInput[spot] = 0;
 		spot = spot + 1;
-	      }
-	    if(red)
+		_delay_ms(500);
+		yellow = 0;
+	      }else if(red)
 	      {
 		arrInput[spot] = 1;
 		spot = spot + 1;
-	      }
-	    if(green)
+		_delay_ms(500);
+		red = 0;
+	      }else if(green)
 	      {
 		arrInput[spot] = 2;
 		spot = spot + 1;
-	      }
-	    if(blue)
+		_delay_ms(500);
+		green = 0;
+	      }else if(blue)
 	      {
 		arrInput[spot] = 3;
 		spot = spot + 1;
+		_delay_ms(500);
+		blue = 0;
 	      }
 	  }
 
-	for(int i = 0; i < iteracion; i++)
+	for(int j = 0; j < iteracion; j++)
 	  {
 	    // Check sequence
-	    if(arrInput[i] != arrGen[i])
+	    if(arrInput[j] == arrGen[j])
 	      {
 		valid = 0;
 	      }
@@ -141,6 +146,7 @@ int main(void)
 	  }
 	iteracion = iteracion + 1;
 	velocidad = velocidad - 200;
+	spot = 0;
       }
   }
 }
