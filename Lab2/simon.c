@@ -4,6 +4,7 @@ Codigo para Simon Says del Laboratorio 2
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 
 // Banderas de botones
 int yellow = 0;
@@ -82,6 +83,21 @@ ISR(TIMER0_OVF_vect)
     }
 }
 
+void shuffle(int *array, size_t n)
+{
+  if (n > 1) 
+    {
+      size_t i;
+      for (i = 0; i < n - 1; i++) 
+        {
+          size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+          int t = array[j];
+          array[j] = array[i];
+          array[i] = t;
+        }
+    }
+}
+
 void delay_ms(unsigned int milliseconds)
  {
    while(milliseconds > 0)
@@ -112,8 +128,9 @@ int main(void)
   int valid = 1;
   int spot = 0;
   int arrInput[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  int arrGen[20] = {0,1,0,1,0,3,3,0,0,0,2,3,3,3,1,0,2,0,2,3};
+  int arrGen[20] = {0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1};
   
+  shuffle(arrGen, 20);
   
   while (1) {
 	  
