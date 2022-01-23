@@ -10,36 +10,64 @@ int yellow = 0;
 int red = 0;
 int green = 0;
 int blue = 0;
+// Flags para debounce
+int deb0 = 0;
+int deb1 = 0;
 
 // recieve inputs
 ISR(INT0_vect)
 {
   // Boton amarillo TL
   yellow = 1;
+  PORTB = 0x04; _delay_ms(5000);
+  PORTB = 0x00; _delay_ms(500);
 }
 ISR(INT1_vect)
 {
   // Boton rojo TR
   red = 1;
+  PORTB = 0x08; _delay_ms(5000);
+  PORTB = 0x00; _delay_ms(500);
 }
 ISR(PCINT0_vect)
 {
   // Boton verde BL
-  green = 1;
+  if(deb0)
+    {
+      green = 1;
+      deb0 = 0;
+      PORTB = 0x10; _delay_ms(5000);
+      PORTB = 0x00; _delay_ms(500);
+    }else
+    {
+      green = 0;
+      deb0 = 1;
+    }
 }
 ISR(PCINT1_vect)
 {
   // Boton azul BR
-  blue = 1;
+  if(deb1)
+    {
+      blue = 1;
+      deb1 = 0;
+      PORTB = 0x20; _delay_ms(5000);
+      PORTB = 0x00; _delay_ms(500);
+    }else
+    {
+      blue = 0;
+      deb1 = 1;
+    }
 }
 
 int main(void)
 {
   DDRB = 0x3C; //Configuracion del puertos
-  GIMSK |= (1<<INT0)|(1<<INT1);
-  GIMSK |= (1<<PCIE0)|(1<<PCIE1);
+  //GIMSK |= (1<<INT0)|(1<<INT1);
+  //GIMSK |= (1<<PCIE0)|(1<<PCIE1);
+  GIMSK |= 0xE8;
   PCMSK |= 0x03;
-  PCMSK1 |= 0x01;
+  PCMSK1 |= 0x03;
   sei();
 
   int init = 0;
@@ -127,9 +155,12 @@ int main(void)
 	for(int j = 0; j < iteracion; j++)
 	  {
 	    // Check sequence
-	    if(arrInput[j] == arrGen[j])
+	    if(arrInput[j] != arrGen[j])
 	      {
 		valid = 0;
+	      }else
+	      {
+		valid = 1;
 	      }
 	  }
 			
@@ -137,16 +168,21 @@ int main(void)
 	  {
 	    // Flash LEDs 3 times
 	    init = 0;
+	    spot = 0;
 	    PORTB = 0x00; _delay_ms(500);
-	    PORTB = 0x3C; _delay_ms(500);
-	    PORTB = 0x00; _delay_ms(500);
-	    PORTB = 0x3C; _delay_ms(500);
-	    PORTB = 0x00; _delay_ms(500);
-	    PORTB = 0x3C; _delay_ms(500);
+	    PORTB = 0x3C; _delay_ms(5000);
+	    PORTB = 0x00; _delay_ms(5000);
+	    PORTB = 0x3C; _delay_ms(5000);
+	    PORTB = 0x00; _delay_ms(5000);
+	    PORTB = 0x3C; _delay_ms(5000);
+	    PORTB = 0x00; _delay_ms(5000);
+	  }else
+	  {
+	    iteracion = iteracion + 1;
+	    velocidad = velocidad - 200;
+	    spot = 0;
+	    init = 1;
 	  }
-	iteracion = iteracion + 1;
-	velocidad = velocidad - 200;
-	spot = 0;
       }
   }
 }
