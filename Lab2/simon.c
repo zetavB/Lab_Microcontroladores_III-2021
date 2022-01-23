@@ -14,6 +14,12 @@ int blue = 0;
 int deb0 = 0;
 int deb1 = 0;
 
+// Tiempo de LED
+int ledTimer = 10;
+int ledValid = 0;
+int initrCount = 0;
+int deRep = 1;
+
 // recieve inputs
 ISR(INT0_vect)
 {
@@ -60,6 +66,31 @@ ISR(PCINT1_vect)
     }
 }
 
+ISR(TIMER0_OVF_vect)
+{
+  if(initrCount == ledTimer)
+    {
+      ledValid = 1;
+      initrCount = 0;
+      //PORTB = 0x04; _delay_ms(5000);
+      
+    }else
+    {
+      initrCount++;
+      
+      //PORTB = 0x00; _delay_ms(5000);
+    }
+}
+
+void delay_ms(unsigned int milliseconds)
+ {
+   while(milliseconds > 0)
+     {
+       _delay_ms(1);
+       milliseconds--;
+     }
+ }
+
 int main(void)
 {
   DDRB = 0x3C; //Configuracion del puertos
@@ -68,15 +99,21 @@ int main(void)
   GIMSK |= 0xE8;
   PCMSK |= 0x03;
   PCMSK1 |= 0x03;
+  TCCR0A |= 0x00;
+  TCCR0B |= 0x05;
   sei();
+  TCNT0 = 0;
+  TIMSK |= (1<<TOIE0);
+  
 
   int init = 0;
   int iteracion = 4;
-  int velocidad = 2000;
+  int velocidad = 10000;
   int valid = 1;
   int spot = 0;
-  int arrInput[10] = {0,0,0,0,0,0,0,0,0};
-  int arrGen[10] = {0,1,2,3,0,1,2,3,0};
+  int arrInput[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int arrGen[20] = {0,1,0,1,0,3,3,0,0,0,2,3,3,3,1,0,2,0,2,3};
+  
   
   while (1) {
 	  
@@ -97,27 +134,38 @@ int main(void)
       }
     while(init)
       {
+	//int nada = 0;
 	for(int i = 0; i < iteracion; i++)
 	  {
 	    // Flash LED sequence
 	    if(arrGen[i] == 0)
 	      {
-		PORTB = 0x04; _delay_ms(5000);
+		PORTB = 0x04; delay_ms(velocidad);
+		/*
+		while(initrCount <= velocidad)
+		  {
+		    nada = nada;
+		  }
+		ledValid = 0;
+		*/
 		PORTB = 0x00; _delay_ms(500);
 	      }
 	    if(arrGen[i] == 1)
 	      {
-		PORTB = 0x08; _delay_ms(5000);
+		TCNT0 |= 0x00;
+		PORTB = 0x08; delay_ms(velocidad);
 		PORTB = 0x00; _delay_ms(500);
 	      }
 	    if(arrGen[i] == 2)
 	      {
-		PORTB = 0x10; _delay_ms(5000);
+		TCNT0 |= 0x00;
+		PORTB = 0x10; delay_ms(velocidad);
 		PORTB = 0x00; _delay_ms(500);
 	      }
 	    if(arrGen[i] == 3)
 	      {
-		PORTB = 0x20; _delay_ms(5000);
+		TCNT0 |= 0x00;
+		PORTB = 0x20; delay_ms(velocidad);
 		PORTB = 0x00; _delay_ms(500);
 	      }
 	  }
@@ -179,11 +227,14 @@ int main(void)
 	  }else
 	  {
 	    iteracion = iteracion + 1;
-	    velocidad = velocidad - 200;
+	    velocidad = velocidad - 500;
+	    ledTimer = velocidad;
 	    spot = 0;
 	    init = 1;
 	  }
       }
   }
 }
+
+
 
