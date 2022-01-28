@@ -7,8 +7,8 @@ const int LEDrojo=2;
 
 int valorTermistor; //numero de 0 a 1023 entrada A0
 float voltajeTermistor; //numero 0 a 5 entrada A0
-int valorHumedad;
-float humedadNormalizada;
+int valorHumedad; //numero de 0 a 1023 entrada A5
+float humedadNormalizada; //numero 0 a 100 entrada A5
 
 void hart(){
   /*float R1 = 100000; //resistencia de 100k en serie con el termistor.
@@ -24,7 +24,7 @@ void hart(){
   Serial.print(TEMPERATURA);*/
 }
 
-void alerta_seguridad(){
+void alerta_seguridad(){ //se activa un led rojo si la temperatura es superior a 42 grados o un led azul si es menor a 30 grados
   if ((voltajeTermistor < 2.72)){ //2.74V -> 30 grados celsius
     digitalWrite(LEDazul, HIGH);
     digitalWrite(LEDrojo, LOW);
@@ -48,7 +48,7 @@ void indicador_humedad(){ //enciende el led integrado si se supera el 50% de hum
   }
 }
 
-void blink(){
+void blink(){ //parpadea el led integrado
   //led parpadea una vez cada vez que inicia el loop
   digitalWrite(LED_BUILTIN, HIGH);
   delay(300);                       
@@ -68,11 +68,11 @@ void setup() {
 void loop() { // loop infinito
 
   valorTermistor = analogRead(A0); //leemos el voltaje que entra al pin A0, valor de 0 a 1023
-  voltajeTermistor = valorTermistor/204.6; //convertimos el valor de 8 bits (0-1023) a un valor acorde al voltaje (0V-5V)
+  voltajeTermistor = valorTermistor/204.6; //convertimos el valor de 10 bits (0-1023) a un valor acorde al voltaje (0V-5V)
   
   valorHumedad = analogRead(A5); //leemos el voltaje que entra al pin A5, valor de 0 a 1023
-  humedadNormalizada = valorHumedad/10.23; //convertimos el valor de 8 bits (0-1023) a un valor normalizado (0%-100%)
+  humedadNormalizada = valorHumedad/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
 
-  alerta_seguridad(); //se activa una alerta si la temperatura es superior a 42 grados o menor a 30 grados
-  indicador_humedad(); //enciende una luz si la humedad es más del 50%
+  alerta_seguridad(); 
+  indicador_humedad();
 }
