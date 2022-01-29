@@ -1,19 +1,8 @@
-#include <NOKIA5110_TEXT_FONT_THREE.h>
-#include <NOKIA5110_TEXT_FONT_NINE.h>
-#include <NOKIA5110_TEXT_FONT_TWO.h>
-#include <NOKIA5110_TEXT_FONT_FIVE.h>
-#include <NOKIA5110_TEXT_FONT_SIX.h>
-#include <NOKIA5110_TEXT_FONT.h>
-#include <NOKIA5110_TEXT_FONT_EIGHT.h>
-#include <NOKIA5110_TEXT.h>
-#include <NOKIA5110_TEXT_FONT_SEVEN.h>
-#include <NOKIA5110_TEXT_FONT_FOUR.h>
+#include <Adafruit_PCD8544.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
 #include <stdio.h>
-
-
 
 //definición de pines
 const int LEDazul=3;
@@ -22,11 +11,11 @@ const int calentador=9;
 char pantalla[10];
 
 // definimos LCD
-NOKIA5110_TEXT mylcd(6, 7, 5, 4, 10);
-#define inverse  false
-#define UseDefaultFont  false
-#define contrast 0xBF
-#define bias 0x14
+Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
 
 int valorCalentador=0;
 
@@ -81,19 +70,25 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
-void ajusteCalentador(float target){
+float ajusteCalentador(float target){
     analogWrite(calentador, roundf(target*0.15*21.25));
+    return target;
 }
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("PCD test");
+  display.begin();
+  display.setContrast(75);
+  display.display(); // show splashscreen
+  delay(2000);
+  display.clearDisplay();   // clears the screen and buffer
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
   //configuracion de pines como salida
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDazul, OUTPUT);
   pinMode(LEDrojo, OUTPUT);
-  mylcd.LCDInit(inverse, contrast, bias); //init the lCD
-  mylcd.LCDClear(); //clear screen
-  mylcd.LCDFont(UseDefaultFont );
 }
 
 
@@ -107,14 +102,21 @@ void loop() { // loop infinito
 
   alerta_seguridad(); 
   indicador_humedad();
-  ajusteCalentador(20);
+  float dutyCycle = ajusteCalentador(20);
 
-  mylcd.LCDgotoXY(0, 0);
-  mylcd.LCDString("VOLTAJE:");
-  delay(2000);
-  mylcd.LCDgotoXY(0, 1);
-  sprintf(pantalla, "%f", valorTermistor);
-  mylcd.LCDString(pantalla);
-  delay(2000);
+  
+  display.setCursor(0,0);
+  display.print("T Set:");
+  display.println(20);
+  display.print("D.Cycle:");
+  display.print(dutyCycle);
+  display.println("%");
+  display.print("Humedad:");
+  display.print(humedadNormalizada);
+  display.println("%");
+  display.print("Temp:");
+  display.println("TBD");
+  display.display();
+  display.clearDisplay();
 
 }
