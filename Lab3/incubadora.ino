@@ -1,9 +1,34 @@
+#include <NOKIA5110_TEXT_FONT_THREE.h>
+#include <NOKIA5110_TEXT_FONT_NINE.h>
+#include <NOKIA5110_TEXT_FONT_TWO.h>
+#include <NOKIA5110_TEXT_FONT_FIVE.h>
+#include <NOKIA5110_TEXT_FONT_SIX.h>
+#include <NOKIA5110_TEXT_FONT.h>
+#include <NOKIA5110_TEXT_FONT_EIGHT.h>
+#include <NOKIA5110_TEXT.h>
+#include <NOKIA5110_TEXT_FONT_SEVEN.h>
+#include <NOKIA5110_TEXT_FONT_FOUR.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <math.h>
+#include <stdio.h>
+
+
 
 //definición de pines
 const int LEDazul=3;
 const int LEDrojo=2;
+const int calentador=9;
+char pantalla[10];
+
+// definimos LCD
+NOKIA5110_TEXT mylcd(6, 7, 5, 4, 10);
+#define inverse  false
+#define UseDefaultFont  false
+#define contrast 0xBF
+#define bias 0x14
+
+int valorCalentador=0;
 
 int valorTermistor; //numero de 0 a 1023 entrada A0
 float voltajeTermistor; //numero 0 a 5 entrada A0
@@ -56,12 +81,19 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
+void ajusteCalentador(float target){
+    analogWrite(calentador, roundf(target*0.15*21.25));
+}
+
 void setup() {
   Serial.begin(9600);
   //configuracion de pines como salida
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDazul, OUTPUT);
   pinMode(LEDrojo, OUTPUT);
+  mylcd.LCDInit(inverse, contrast, bias); //init the lCD
+  mylcd.LCDClear(); //clear screen
+  mylcd.LCDFont(UseDefaultFont );
 }
 
 
@@ -75,4 +107,14 @@ void loop() { // loop infinito
 
   alerta_seguridad(); 
   indicador_humedad();
+  ajusteCalentador(20);
+
+  mylcd.LCDgotoXY(0, 0);
+  mylcd.LCDString("VOLTAJE:");
+  delay(2000);
+  mylcd.LCDgotoXY(0, 1);
+  sprintf(pantalla, "%f", valorTermistor);
+  mylcd.LCDString(pantalla);
+  delay(2000);
+
 }
