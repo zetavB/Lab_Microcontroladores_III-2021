@@ -9,7 +9,6 @@ const int LEDazul=3;
 const int LEDrojo=2;
 const int calentador=9;
 const int comm=13;
-char pantalla[10];
 
 // definimos LCD
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
@@ -23,7 +22,7 @@ float R1 = 100000; //resistencia de 100k en serie con el termistor.
 float logR2, R2, TEMPERATURA;
 
 //coeficientes de steinhart-hart, obtenidos de: https://www.thinksrs.com/downloads/programs/Therm%20Calc/NTCCalibrator/NTCcalculator.htm
-float c1 = -0.008017042919e-03, c2 = 2.931366473e-04, c3 = -0.08405517035e-07; 
+float c1 = 0.8586139205e-03, c2 = 2.059709585e-04, c3 = 0.8130635267e-07; 
 
 float dutyCycle;
 int valorCalentador=0;
@@ -47,15 +46,15 @@ void hart(){ //uiliza una ecuación para estimar la temperatura de acuerdo a la 
 }
 
 void alerta_seguridad(){ //se activa un led rojo si la temperatura es superior a 42 grados o un led azul si es menor a 30 grados
-  if ((voltajeTermistor < 2.72)){ //2.74V -> 30 grados celsius
+  if ((TEMPERATURA < 30)){ //2.74V -> 30 grados celsius
     digitalWrite(LEDazul, HIGH);
     digitalWrite(LEDrojo, LOW);
   }
-  else if ((voltajeTermistor > 2.72) & (voltajeTermistor < 3.27)){ //funcionamiento normal
+  else if ((TEMPERATURA > 30) & (TEMPERATURA < 42)){ //funcionamiento normal
     digitalWrite(LEDrojo, LOW);
     digitalWrite(LEDazul, LOW);
   }
-  else if ((voltajeTermistor > 3.27)){ //3.26V -> 42 grados celsius
+  else if ((TEMPERATURA > 42)){ //3.26V -> 42 grados celsius
     digitalWrite(LEDazul, LOW);
     digitalWrite(LEDrojo, HIGH);
   }
@@ -81,14 +80,14 @@ void blink(){ //parpadea el led integrado
 float ajusteCalentador(float target){
   // Checks de seguridad para prevenir cocinar los huevos
   if(target > 42){
-    analogWrite(calentador, roundf(42*0.15*21.25));
-    return 42;
+    analogWrite(calentador, roundf(42*(255/80)));
+    return 42*100/80;
   }else if(TEMPERATURA < 30){
-    analogWrite(calentador, roundf(30*0.15*21.25));
-    return 30;
+    analogWrite(calentador, roundf(30*(255/80)));
+    return 30*100/80;
   }else{
-    analogWrite(calentador, roundf(target*0.15*21.25));
-    return target;
+    analogWrite(calentador, roundf(target*(255/80)));
+    return target*100/80;
   }
 }
 
