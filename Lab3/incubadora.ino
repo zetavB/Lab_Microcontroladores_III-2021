@@ -8,6 +8,7 @@
 const int LEDazul=3;
 const int LEDrojo=2;
 const int calentador=9;
+const int comm=13;
 char pantalla[10];
 
 // definimos LCD
@@ -35,6 +36,8 @@ float valorDeseadoDisplay;
 
 int valorHumedad; //numero de 0 a 1023 entrada A5
 float humedadNormalizada; //numero 0 a 100 entrada A5
+
+float error;
 
 void hart(){ //uiliza una ecuación para estimar la temperatura de acuerdo a la resistencia del termistor
   R2 = R1 * (1023.0 / (float)valorTermistor - 1.0);
@@ -76,8 +79,17 @@ void blink(){ //parpadea el led integrado
 }
 
 float ajusteCalentador(float target){
+  // Checks de seguridad para prevenir cocinar los huevos
+  if(target > 42){
+    analogWrite(calentador, roundf(42*0.15*21.25));
+    return 42;
+  }else if(TEMPERATURA < 30){
+    analogWrite(calentador, roundf(30*0.15*21.25));
+    return 30;
+  }else{
     analogWrite(calentador, roundf(target*0.15*21.25));
     return target;
+  }
 }
 
 void display_refresh(){
@@ -96,6 +108,10 @@ void display_refresh(){
   display.clearDisplay();
 }
 
+float pidControl(float set, float current){
+    return set - current;
+}
+
 void setup() {
   Serial.begin(9600);
   Serial.println("PCD test");
@@ -110,9 +126,18 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDazul, OUTPUT);
   pinMode(LEDrojo, OUTPUT);
+  pinMode(comm, INPUT);
 }
 
 void loop() { // loop infinito
+  if(digitalRead(comm) == LOW){
+    Serial.print("TEMPERATURA:");
+    Serial.print(TEMPERATURA);
+    Serial.println(" C");
+    Serial.print("HUMEDAD:");
+    Serial.print(humedadNormalizada);
+    Serial.println("%");
+  }
   valorDeseado = analogRead(A4);
   valorDeseadoDisplay = (valorDeseado)/5.11;
 
@@ -124,9 +149,14 @@ void loop() { // loop infinito
 
   alerta_seguridad();
 
-  dutyCycle = ajusteCalentador(20);
-
   hart();
 
+  error = pidControl(valorDeseadoDisplay, TEMPERATURA);
+
+  if(error > 0){
+    dutyCycle = ajusteCalentador(TEMPERATURA+error);
+  }else{
+    dutyCycle = ajusteCalentador(0);
+  }
   display_refresh();
 }
