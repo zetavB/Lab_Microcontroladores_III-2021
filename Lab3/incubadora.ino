@@ -28,7 +28,10 @@ float dutyCycle;
 int valorCalentador=0;
 
 int valorTermistor; //numero de 0 a 1023 entrada A0
-float voltajeTermistor; //numero 0 a 5 entrada A0
+float voltajeTermistor; //numero 0 a 5 entrada A04
+
+float valorDeseado;
+float valorDeseadoDisplay;
 
 int valorHumedad; //numero de 0 a 1023 entrada A5
 float humedadNormalizada; //numero 0 a 100 entrada A5
@@ -79,16 +82,16 @@ float ajusteCalentador(float target){
 
 void display_refresh(){
   display.setCursor(0,0);
-  display.print("T Set:");
-  display.println(20);
-  display.print("D.Cycle:");
-  display.print(dutyCycle);
-  display.println("%");
-  display.print("Humedad:");
-  display.print(humedadNormalizada);
-  display.println("%");
+  display.print("T.Set:");
+  display.println(valorDeseadoDisplay);
   display.print("Temp:");
   display.println(TEMPERATURA);
+  display.print("Duty:");
+  display.print(dutyCycle);
+  display.println("%");
+  display.print("Hum:");
+  display.print(humedadNormalizada);
+  display.println("%");
   display.display();
   display.clearDisplay();
 }
@@ -110,6 +113,8 @@ void setup() {
 }
 
 void loop() { // loop infinito
+  valorDeseado = analogRead(A4);
+  valorDeseadoDisplay = (valorDeseado)/5.11;
 
   valorTermistor = analogRead(A0); //leemos el voltaje que entra al pin A0, valor de 0 a 1023
   voltajeTermistor = valorTermistor/204.6; //convertimos el valor de 10 bits (0-1023) a un valor acorde al voltaje (0V-5V)
@@ -117,9 +122,11 @@ void loop() { // loop infinito
   valorHumedad = analogRead(A5); //leemos el voltaje que entra al pin A5, valor de 0 a 1023
   humedadNormalizada = valorHumedad/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
 
-  alerta_seguridad(); 
-  indicador_humedad();
+  alerta_seguridad();
+
   dutyCycle = ajusteCalentador(20);
+
   hart();
+
   display_refresh();
 }
