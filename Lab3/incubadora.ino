@@ -83,7 +83,7 @@ float ajusteCalentador(float target){
   if(target > 42){
     analogWrite(calentador, roundf(42*(255/80)));
     return 42*100/80;
-  }else if(TEMPERATURA < 30){
+  }else if(target < 30){
     analogWrite(calentador, roundf(30*(255/80)));
     return 30*100/80;
   }else{
@@ -153,7 +153,7 @@ void loop() { // loop infinito
 
   error = pidControl(valorDeseadoDisplay, TEMPERATURA);
 
-  if(error > 0){
+  if(error != 0){
     dutyCycle = ajusteCalentador(TEMPERATURA+error);
   }else{
     dutyCycle = ajusteCalentador(0);
