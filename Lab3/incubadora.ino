@@ -35,6 +35,7 @@ float valorDeseadoDisplay;
 
 int valorHumedad; //numero de 0 a 1023 entrada A5
 float humedadNormalizada; //numero 0 a 100 entrada A5
+float humedadDisplay;
 
 float error;
 
@@ -101,7 +102,7 @@ void display_refresh(){
   display.print(dutyCycle);
   display.println("%");
   display.print("Hum:");
-  display.print(humedadNormalizada);
+  display.print(humedadDisplay);
   display.println("%");
   display.display();
   display.clearDisplay();
@@ -134,7 +135,7 @@ void loop() { // loop infinito
     Serial.print(TEMPERATURA);
     Serial.println(" C");
     Serial.print("HUMEDAD:");
-    Serial.print(humedadNormalizada);
+    Serial.print(humedadDisplay);
     Serial.println("%");
   }
   valorDeseado = analogRead(A4);
@@ -144,8 +145,8 @@ void loop() { // loop infinito
   voltajeTermistor = valorTermistor/204.6; //convertimos el valor de 10 bits (0-1023) a un valor acorde al voltaje (0V-5V)
   
   valorHumedad = analogRead(A5); //leemos el voltaje que entra al pin A5, valor de 0 a 1023
-  humedadNormalizada = valorHumedad/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
-
+  humedadNormalizada = valorHumedad/14.61428571; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
+  humedadDisplay = humedadNormalizada+20;
   alerta_seguridad();
 
   hart();
