@@ -81,14 +81,29 @@ void blink(){ //parpadea el led integrado
 float ajusteCalentador(float target){
   // Checks de seguridad para prevenir cocinar los huevos
   if(target > 42){
-    analogWrite(calentador, roundf(42*(255/80)));
-    return 42*100/80;
+    if(TEMPERATURA <= 42){
+      analogWrite(calentador, roundf(42*(255/80)));
+      return 42*100/80;
+    }else{
+      analogWrite(calentador, roundf(0*(255/80)));
+      return 0*100/80;
+    }
   }else if(target < 30){
-    analogWrite(calentador, roundf(30*(255/80)));
-    return 30*100/80;
+    if(TEMPERATURA >= 30){
+      analogWrite(calentador, roundf(0*(255/80)));
+      return 0*100/80;
+    }else{
+      analogWrite(calentador, roundf(30*(255/80)));
+      return 30*100/80;
+    }
   }else{
-    analogWrite(calentador, roundf(target*(255/80)));
-    return target*100/80;
+    if(target < TEMPERATURA){
+      analogWrite(calentador, roundf(0*(255/80)));
+      return 0*100/80;
+    }else{
+      analogWrite(calentador, roundf(target*(255/80)));
+      return target*100/80;
+    }
   }
 }
 
