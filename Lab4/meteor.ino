@@ -39,6 +39,10 @@ int valorBateria;
 float bateriaNormalizada;
 int bateriaDisplay;
 
+int contador = 0;
+int contador2 = 0;
+int parpadeos = 0;
+
 void hart(){ //uiliza una ecuación para estimar la temperatura de acuerdo a la resistencia del termistor
   R2 = R1 * (1023.0 / (float)valorTermistor - 1.0);
   logR2 = log(R2);
@@ -58,9 +62,9 @@ void indicador_humedad(){ //enciende el led integrado si se supera el 50% de hum
 void blink(){ //parpadea el led integrado
   //led parpadea una vez cada vez que inicia el loop
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);                       
+  delay(300);                       
   digitalWrite(LED_BUILTIN, LOW);    
-  delay(1000);
+  delay(300);
 }
 
 void display_refresh(){
@@ -93,12 +97,45 @@ void setup() {
   display.setTextColor(BLACK);
 
   //configuracion de pines como salida
-  //pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDazul, OUTPUT);
   pinMode(comm, INPUT);
 }
 
 void loop() { // loop infinito
+
+  if (digitalRead(comm) == HIGH){
+    digitalWrite(LEDazul, LOW);
+    parpadeos = 0;
+    contador = 0;
+    contador2 = 0;
+  }
+
+  //El led del pin 2 parpadea 5 veces y se apaga por un periodo antes de volver a parpadear 5 veces, con esto evitamos usar delays y que se retrase en recorrer el loop 
+  if (digitalRead(comm) == LOW){
+    if (parpadeos < 10){
+      if (contador < 10){
+        contador = contador + 1;
+      }
+      else{
+        digitalWrite(LEDazul, !digitalRead(LEDazul)); //toggle
+        parpadeos = parpadeos + 1;
+        contador = 0;
+      }
+    }
+    else{
+      if (contador2 < 90){
+        contador2 = contador2 + 1;
+      }
+      else{
+        contador2 = 0;
+        parpadeos = 0;
+      }
+    }
+
+  }
+
+  //Si la comunicación está activada, se envian los datos
   if(digitalRead(comm) == LOW){
     Serial.print("BATERIA:");
     Serial.print(bateriaDisplay);
@@ -120,16 +157,16 @@ void loop() { // loop infinito
   hart();
   
   valorHumedad = analogRead(A15); //leemos el voltaje que entra al pin A15, valor de 0 a 1023
-  humedadNormalizada = valorHumedad/14.61428571; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-70%)
-  humedadDisplay = round(humedadNormalizada)+20; //se hace un offset debido a que el sensor mide de 20 a 90%
+  humedadNormalizada = valorHumedad/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
+  humedadDisplay = round(humedadNormalizada); //se redondea para no mostrar decimales en la pantalla
 
   valorViento = analogRead(A14); //leemos el voltaje que entra al pin A14, valor de 0 a 1023
   vientoNormalizado = valorViento/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
-  vientoDisplay = round(vientoNormalizado);
+  vientoDisplay = round(vientoNormalizado); //se redondea para no mostrar decimales en la pantalla
 
   valorBateria = analogRead(A13); //leemos el voltaje que entra al pin A13, valor de 0 a 1023
   bateriaNormalizada = valorBateria/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
-  bateriaDisplay = round(bateriaNormalizada);
+  bateriaDisplay = round(bateriaNormalizada); //se redondea para no mostrar decimales en la pantalla
 
   display_refresh();
 }
