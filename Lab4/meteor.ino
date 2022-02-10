@@ -3,12 +3,14 @@
 #include <util/delay.h>
 #include <math.h>
 #include <stdio.h>
+#include <EEPROM.h>
 
 //definicion de pines
 const int LEDazul=2;
 const int LEDrojo=53;
 const int comm=12;
 const int powerScreen = 22;
+const int sensorLluvia = 11;
 
 // definimos LCD
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
@@ -16,6 +18,9 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
 #define XPOS 0
 #define YPOS 1
 #define DELTAY 2
+
+// Address de EEPROM
+int addr = 0;
 
 //definicion de parametros necesarios para las ecuaciones de S-H para estimar la temperatura a partir del termistor
 float R1 = 100000; //resistencia de 100k en serie con el termistor.
@@ -50,6 +55,14 @@ int lluviaDisplay;
 int valorLuz; 
 float luzNormalizada;
 int luzDisplay;
+
+// Variables para contar tiempo
+unsigned long startTime;
+unsigned long startTimeGeneral;
+unsigned long currentTime;
+unsigned long currentTimeGeneral;
+const unsigned long tenMin = 600000; //10 minutos en ms
+unsigned int timerStartEnable = 1;
 
 int contador = 0;
 int contador2 = 0;
@@ -102,8 +115,11 @@ void display_refresh(){ // Se muestan los datos en la pantalla si el switch de p
       display.print(vientoDisplay);
       display.println("%");
       display.print("LLUVIA:  ");
-      display.print(lluviaDisplay);
-      display.println("%");
+      if(lluviaDisplay == 1){
+        display.println("Si");
+      }else{
+        display.println("No");
+      }
       display.print("LUZ:     ");
       display.print(luzDisplay);
       display.println("%"); 
@@ -114,24 +130,80 @@ void display_refresh(){ // Se muestan los datos en la pantalla si el switch de p
 
 void serial_refresh(){ //se refresca el serial si el el switch de comm esta cerrado
   if(digitalRead(comm) == LOW){
-    Serial.print("BATERIA:");
-    Serial.print(bateriaDisplay);
-    Serial.println("%");
-    Serial.print("TEMPERATURA:");
-    Serial.print(tempDisplay);
-    Serial.println(" C");
-    Serial.print("HUMEDAD:");
-    Serial.print(humedadDisplay);
-    Serial.println("%");
-    Serial.print("VIENTO:");
-    Serial.print(vientoDisplay);
-    Serial.println("%");
-    Serial.print("LLUVIA:");
-    Serial.print(lluviaDisplay);
-    Serial.println("%");
-    Serial.print("LUZ:");
-    Serial.print(luzDisplay);
-    Serial.println("%");
+    if(timerStartEnable == 1){
+      startTime = millis();
+      timerStartEnable = 0;
+      }
+    currentTime = millis();
+    if(currentTime - startTime >= tenMin){
+      Serial.print("BATERIA:");
+      Serial.print(bateriaDisplay);
+      Serial.println("%");
+      Serial.print("TEMPERATURA:");
+      Serial.print(tempDisplay);
+      Serial.println(" C");
+      Serial.print("HUMEDAD:");
+      Serial.print(humedadDisplay);
+      Serial.println("%");
+      Serial.print("VIENTO:");
+      Serial.print(vientoDisplay);
+      Serial.println("%");
+      Serial.print("LLUVIA:");
+      if(lluviaDisplay == 1){
+        Serial.println("Si");
+      }else{
+        Serial.println("No");
+      }
+      Serial.print("LUZ:");
+      Serial.print(luzDisplay);
+      Serial.println("%");
+      timerStartEnable = 1;
+    }
+  }
+}
+
+void rainCheck(){
+  if(digitalRead(sensorLluvia) == LOW){
+    lluviaDisplay = 1;
+  }else{
+    lluviaDisplay = 0;
+  }
+}
+
+void memoryVerify(){
+  if (addr == EEPROM.length()) {
+      addr = 0;
+      for (int i = 0 ; i < EEPROM.length() ; i++) {
+        EEPROM.write(i, 0);
+      }
+    }
+}
+
+void memoryWrite(){
+  currentTimeGeneral = millis();
+  if(currentTimeGeneral - startTimeGeneral >= tenMin/100){
+    
+    memoryVerify();
+    EEPROM.write(addr, tempDisplay);
+    ++addr;
+    Serial.println("poo");
+    
+    memoryVerify();
+    EEPROM.write(addr, humedadDisplay);
+    ++addr;
+
+    memoryVerify();
+    EEPROM.write(addr, luzDisplay);
+    ++addr;
+
+    memoryVerify();
+    EEPROM.write(addr, vientoDisplay);
+    ++addr;
+
+    memoryVerify();
+    EEPROM.write(addr, lluviaDisplay);
+    ++addr;
+    startTimeGeneral = currentTimeGeneral;
   }
 }
 
@@ -152,6 +224,15 @@ void setup() {
   pinMode(LEDrojo, OUTPUT);
   pinMode(comm, INPUT);
   pinMode(powerScreen, INPUT);
+  pinMode(sensorLluvia, INPUT);
+
+  //Timer de inicio de ejcuccion
+  startTimeGeneral = millis();
+
+  // Ponemos memoria EEPROM en ceros
+  for (int i = 0 ; i < EEPROM.length() ; i++) {
+        EEPROM.write(i, 0);
+      }
 }
 
 void loop() { // loop infinito
@@ -203,14 +284,14 @@ void loop() { // loop infinito
   bateriaNormalizada = valorBateria/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
   bateriaDisplay = round(bateriaNormalizada); //se redondea para no mostrar decimales en la pantalla
 
-  valorLluvia = 1;
-  lluviaNormalizada = 1;
-  lluviaDisplay = 1;
-
   valorLuz = 1;
   luzNormalizada = 1;
   luzDisplay = 1;
 
   battery_low();
+  rainCheck();
+  memoryWrite();
+  
+  serial_refresh();
   display_refresh();
 }
