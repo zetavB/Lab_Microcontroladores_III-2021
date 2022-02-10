@@ -6,6 +6,10 @@
 
 //definición de pines
 const int comm=12;
+const int door = 53;
+const int doorLED = 52;
+const int window = 51;
+const int windowLED = 50;
 
 // definimos LCD
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
@@ -13,6 +17,10 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
 #define XPOS 0
 #define YPOS 1
 #define DELTAY 2
+
+//PUERTA
+int doorState = 0;
+int windowState = 0;
 
 //BATERIA
 int valorBateria; 
@@ -23,6 +31,8 @@ int bateriaDisplay;
 int contador = 0;
 int contador2 = 0;
 int parpadeos = 0;
+int flagWindow = 0;
+int flagDoor = 0;
 
 void blink(){ //parpadea el led integrado
   digitalWrite(LED_BUILTIN, HIGH);
@@ -31,20 +41,49 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
+void window_open(){
+  if (digitalRead(window) == HIGH){
+    windowState = 1;
+    if (flagWindow < 5){
+      flagWindow++;
+    }
+    else{
+      flagWindow = 0;
+      digitalWrite(windowLED, !digitalRead(windowLED));
+    }
+  }
+  else{
+    windowState = 0;
+    digitalWrite(windowLED, LOW);
+  }
+}
+
+void door_open(){
+  if (digitalRead(door) == HIGH){
+    doorState = 1;
+    if (flagDoor < 5){
+      flagDoor++;
+    }
+    else{
+      flagDoor = 0;
+      digitalWrite(doorLED, !digitalRead(doorLED));
+    }
+  }
+  else{
+    doorState = 0;
+    digitalWrite(doorLED, LOW);
+  }
+}
+
+
 void display_refresh(){ // Se refrescan los datos en la pantalla con los resultados más recientes
   display.setCursor(0,0);
-  display.print("BATERIA: ");
-  display.print(bateriaDisplay);
-  display.println("%");
-  display.print("TEMP:    ");
-  display.print(tempDisplay);
-  display.println("C");
-  display.print("HUMEDAD: ");
-  display.print(humedadDisplay);
-  display.println("%");
-  display.print("VIENTO:  ");
-  display.print(vientoDisplay);
-  display.println("%");
+  display.print("Door open:   ");
+  display.print(doorState);
+  display.println("");
+  display.print("Window open: ");
+  display.print(windowState);
+  display.println("");
   display.display();
   display.clearDisplay();
 }
@@ -53,15 +92,6 @@ void serial_refresh(){ //Si la comunicación está activada, se envian los datos
   if(digitalRead(comm) == LOW){
     Serial.print("BATERIA:");
     Serial.print(bateriaDisplay);
-    Serial.println("%");
-    Serial.print("TEMPERATURA:");
-    Serial.print(tempDisplay);
-    Serial.println(" C");
-    Serial.print("HUMEDAD:");
-    Serial.print(humedadDisplay);
-    Serial.println("%");
-    Serial.print("VIENTO:");
-    Serial.print(vientoDisplay);
     Serial.println("%");
   }
 }
@@ -79,12 +109,14 @@ void setup() {
 
   //configuracion de pines como salida
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LEDazul, OUTPUT);
+  pinMode(doorLED, OUTPUT);
+  pinMode(windowLED, OUTPUT);
   pinMode(comm, INPUT);
 }
 
 void loop() { // loop infinito
-
+  door_open();
+  window_open();
   serial_refresh();
   display_refresh();
 
