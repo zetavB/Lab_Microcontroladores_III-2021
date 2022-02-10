@@ -181,7 +181,7 @@ void memoryVerify(){
 
 void memoryWrite(){
   currentTimeGeneral = millis();
-  if(currentTimeGeneral - startTimeGeneral >= tenMin/100){
+  if(currentTimeGeneral - startTimeGeneral >= tenMin/2){
     
     memoryVerify();
     EEPROM.write(addr, tempDisplay);
