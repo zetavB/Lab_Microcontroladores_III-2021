@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <EEPROM.h>
+#include <Servo.h>
 
 //definicion de pines
 const int LEDazul=2;
@@ -11,6 +12,8 @@ const int LEDrojo=53;
 const int comm=12;
 const int powerScreen = 22;
 const int sensorLluvia = 11;
+const int xInputPin = 6;
+const int yInputPin = 7;
 
 // definimos LCD
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
@@ -63,6 +66,12 @@ unsigned long currentTime;
 unsigned long currentTimeGeneral;
 const unsigned long tenMin = 600000; //10 minutos en ms
 unsigned int timerStartEnable = 1;
+
+// Configuracion de servomotores
+Servo xAxis;
+Servo yAxis;
+int xInput;
+int yInput;
 
 int contador = 0;
 int contador2 = 0;
@@ -179,6 +188,17 @@ void memoryVerify(){
     }
 }
 
+void panelAdjust(){
+  xInput = analogRead(xInputPin);
+  yInput = analogRead(yInputPin);
+
+  xInput = map(xInput, 0, 1023, 0, 180);
+  yInput = map(yInput, 0, 1023, 0, 180);
+
+  xAxis.write(xInput);
+  yAxis.write(yInput);
+}
+
 void memoryWrite(){
   currentTimeGeneral = millis();
   if(currentTimeGeneral - startTimeGeneral >= tenMin/2){
@@ -225,6 +245,10 @@ void setup() {
   pinMode(comm, INPUT);
   pinMode(powerScreen, INPUT);
   pinMode(sensorLluvia, INPUT);
+
+  // Configuracion de servomotores
+  xAxis.attach(8);
+  yAxis.attach(9);
 
   //Timer de inicio de ejcuccion
   startTimeGeneral = millis();
@@ -291,6 +315,7 @@ void loop() { // loop infinito
   battery_low();
   rainCheck();
   memoryWrite();
+  panelAdjust();
   
   serial_refresh();
   display_refresh();
