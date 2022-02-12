@@ -7,6 +7,7 @@
 #include <Servo.h>
 #include "LowPower.h"
 
+
 //definicion de pines
 const int LEDazul=2;
 const int LEDrojo=53;
@@ -202,8 +203,8 @@ void panelAdjust(){
   xInput = map(xInput, 0, 1023, 0, 180);
   yInput = map(yInput, 0, 1023, 0, 180);
 
-  xAxis.write(xInput);
-  yAxis.write(yInput);
+  xAxis.write(round(xInput));
+  yAxis.write(round(yInput));
 }
 
 void memoryWrite(){
@@ -254,8 +255,8 @@ void setup() { // se realiza el setup
   pinMode(sensorLluvia, INPUT);
 
   // Configuracion de servomotores
-  xAxis.attach(8);
-  yAxis.attach(9);
+  xAxis.attach(8, 1000, 2000);
+  yAxis.attach(9, 1000, 2000);
 
   //Timer de inicio de ejcuccion
   startTimeGeneral = millis();
