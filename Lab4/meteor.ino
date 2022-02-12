@@ -49,6 +49,7 @@ int vientoDisplay;
 int valorBateria; 
 float bateriaNormalizada;
 int bateriaDisplay;
+float bateriaVolts;
 
 //LLUVIA
 int valorLluvia; 
@@ -94,8 +95,8 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
-void battery_low(){ //se comprueba si la batería está en un nivel que se considera como "batería baja" y se activa una alerta y el modo de bajo consumo
-  if (bateriaDisplay <= 15){
+void battery_low(){ //se comprueba si la bateria esta en un nivel que se considera como "bateria baja" y se activa una alerta y el modo de bajo consumo
+  if (bateriaDisplay <= 25){ //11.94V es el 25% de la bateria segun el fabricante
 
   LowPower.idle(SLEEP_8S, ADC_OFF, TIMER5_OFF, TIMER4_OFF,
                 TIMER3_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF,
@@ -153,7 +154,7 @@ void serial_refresh(){ //se refresca el serial si el el switch de comm esta cerr
     if(currentTime - startTime >= tenMin){
       Serial.print("BATERIA:");
       Serial.print(bateriaDisplay);
-      Serial.println("%");
+      Serial.println("V");
       Serial.print("TEMPERATURA:");
       Serial.print(tempDisplay);
       Serial.println(" C");
@@ -313,9 +314,16 @@ void loop() { // loop infinito
   vientoDisplay = round(vientoNormalizado); //se redondea para no mostrar decimales en la pantalla
 
   //toma valores para el nivel de la batería
-  valorBateria = analogRead(A13); //leemos el voltaje que entra al pin A13, valor de 0 a 1023
-  bateriaNormalizada = valorBateria/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
-  bateriaDisplay = round(bateriaNormalizada); //se redondea para no mostrar decimales en la pantalla
+  valorBateria = analogRead(A13)-926; //leemos el voltaje que entra al pin A13, valor de 0 a 1023 -> 0 a 96
+  bateriaNormalizada = valorBateria/0.96; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
+  
+  if (bateriaNormalizada >= 0){
+    bateriaDisplay = round(bateriaNormalizada); //se redondea para no mostrar decimales en la pantalla
+  }else{
+    bateriaDisplay = 0;
+  }
+
+  //bateriaVolts = valorBateria/79.6728972; //valor entre 0 y 12.84V
 
   //toma valores para el sensor de luz
   valorLuz = 1;

@@ -38,7 +38,7 @@ Circuit Id: Node-5557
 
 Unique  Id: TextComponent-5540: 
 Circuit Id: TextComponent-4616
-<item boardRot="-1e+06" Text="510 y 12 ohms son valores comerciales para un total de 522 ohms" id="TextComponent-4616" Opacity="1" Font="Helvetica [Cronyx]" vflip="1" Border="1" circPos="0,0" valLabRot="0" boardPos="-1e+06,-1e+06" objectName="TextComponent-5540" valLabelx="0" valLabely="0" Fixed_Width="false" Margin="2" Font_Size="7" itemtype="TextComponent" x="556" labelx="-16" hflip="1" labely="-24" mainComp="false" Show_id="false" y="-544" circRot="6.45086817599e-312" labelrot="0" rotation="0"/>
+<item boardRot="-1e+06" Text="510 y 12 ohms son valores comerciales para un total de 522 ohms" id="TextComponent-4616" Opacity="1" Font="Helvetica [Cronyx]" vflip="1" Border="1" circPos="0,0" valLabRot="0" boardPos="-1e+06,-1e+06" objectName="TextComponent-5540" valLabelx="0" valLabely="0" Fixed_Width="false" Margin="2" Font_Size="8" itemtype="TextComponent" x="556" labelx="-16" hflip="1" labely="-24" mainComp="false" Show_id="false" y="-544" circRot="6.45086817599e-312" labelrot="0" rotation="0"/>
 
 Unique  Id: Ground-5494: 
 Circuit Id: Ground-4631
@@ -202,7 +202,7 @@ Circuit Id: Ground-4631
 
 Unique  Id: TextComponent-5628: 
 Circuit Id: TextComponent-4616
-<item boardRot="-1e+06" Text="Batería baja" id="TextComponent-4616" Opacity="1" Font="Helvetica [Cronyx]" vflip="1" Border="1" circPos="0,0" valLabRot="0" boardPos="-1e+06,-1e+06" objectName="TextComponent-5628" valLabelx="0" valLabely="0" Fixed_Width="false" Margin="2" Font_Size="7" itemtype="TextComponent" x="476" labelx="-16" hflip="1" labely="-24" mainComp="false" Show_id="false" y="-764" circRot="6.45086817599e-312" labelrot="0" rotation="0"/>
+<item boardRot="-1e+06" Text="Batería baja al 25% de la batería.&#xa;25% = 11.94V según el fabricante" id="TextComponent-4616" Opacity="1" Font="Helvetica [Cronyx]" vflip="1" Border="1" circPos="0,0" valLabRot="0" boardPos="-1e+06,-1e+06" objectName="TextComponent-5628" valLabelx="0" valLabely="0" Fixed_Width="false" Margin="2" Font_Size="8" itemtype="TextComponent" x="440" labelx="-16" hflip="1" labely="-24" mainComp="false" Show_id="false" y="-776" circRot="6.45086817599e-312" labelrot="0" rotation="0"/>
 
 Unique  Id: RelaySPST-5715: 
 Circuit Id: RelaySPST-5715
