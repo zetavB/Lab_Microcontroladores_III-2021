@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <EEPROM.h>
 #include <Servo.h>
+#include "LowPower.h"
 
 //definicion de pines
 const int LEDazul=2;
@@ -93,8 +94,13 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
-void battery_low(){
+void battery_low(){ //se comprueba si la batería está en un nivel que se considera como "batería baja" y se activa una alerta y el modo de bajo consumo
   if (bateriaDisplay <= 15){
+
+  LowPower.idle(SLEEP_8S, ADC_OFF, TIMER5_OFF, TIMER4_OFF,
+                TIMER3_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF,
+                USART3_OFF, USART2_OFF, USART1_OFF, USART0_OFF, TWI_OFF); //entra en modo bajo consumo
+
     if (flag < 3){
       flag++;
     }
@@ -227,7 +233,7 @@ void memoryWrite(){
   }
 }
 
-void setup() {
+void setup() { // se realiza el setup
   Serial.begin(9600);
   Serial.println("PCD test");
   display.begin();
@@ -260,7 +266,7 @@ void setup() {
 }
 
 void loop() { // loop infinito
-
+  
   if (digitalRead(comm) == HIGH){
     digitalWrite(LEDazul, LOW);
     parpadeos = 0;
@@ -291,32 +297,35 @@ void loop() { // loop infinito
     }
   }
   
-
+  //toma valores para el sensor de temperatura
   valorTermistor = analogRead(A0); //leemos el voltaje que entra al pin A0, valor de 0 a 1023
   hart();
   tempDisplay = round(TEMPERATURA); //convertimos el valor de 10 bits (0-1023) a un valor acorde al voltaje (0V-5V)
   
+  //toma valores para el sensor de humedad
   valorHumedad = analogRead(A15); //leemos el voltaje que entra al pin A15, valor de 0 a 1023
   humedadNormalizada = valorHumedad/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
   humedadDisplay = round(humedadNormalizada); //se redondea para no mostrar decimales en la pantalla
 
+  //toma valores para el sensor de viento
   valorViento = analogRead(A14); //leemos el voltaje que entra al pin A14, valor de 0 a 1023
   vientoNormalizado = valorViento/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
   vientoDisplay = round(vientoNormalizado); //se redondea para no mostrar decimales en la pantalla
 
+  //toma valores para el nivel de la batería
   valorBateria = analogRead(A13); //leemos el voltaje que entra al pin A13, valor de 0 a 1023
   bateriaNormalizada = valorBateria/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
   bateriaDisplay = round(bateriaNormalizada); //se redondea para no mostrar decimales en la pantalla
 
+  //toma valores para el sensor de luz
   valorLuz = 1;
   luzNormalizada = 1;
   luzDisplay = 1;
-
-  battery_low();
+  
+  battery_low(); 
   rainCheck();
   memoryWrite();
   panelAdjust();
-  
   serial_refresh();
   display_refresh();
 }
