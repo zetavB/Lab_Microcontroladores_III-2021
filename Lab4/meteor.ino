@@ -6,7 +6,9 @@
 #include <EEPROM.h>
 #include <Servo.h>
 #include "LowPower.h"
+//#include "ThingsBoard.h"
 
+#define THINGSBOARD_SERVER "demo.thingsboard.io"
 
 //definicion de pines
 const int LEDazul=2;
@@ -35,6 +37,8 @@ float c1 = 0.8586139205e-03, c2 = 2.059709585e-04, c3 = 0.8130635267e-07; //coef
 //TEMP
 int valorTermistor; 
 int tempDisplay;
+#define TOKEN_TEMP "a9Ggq3euSFkiqrHOaraF"
+
 
 //HUMEDAD
 int valorHumedad; 
@@ -45,6 +49,8 @@ int humedadDisplay;
 int valorViento; 
 float vientoNormalizado; 
 int vientoDisplay;
+float vientoVolts;
+float vientoVelocidad;
 
 //BATERIA
 int valorBateria; 
@@ -139,7 +145,7 @@ void display_refresh(){ // Se muestan los datos en la pantalla si el switch de p
       display.println("%");
       display.print("VIENTO:  ");
       display.print(vientoDisplay);
-      display.println("%");
+      display.println("m/s");
       display.print("LLUVIA:  ");
       if(lluviaDisplay == 1){
         display.println("Si");
@@ -309,7 +315,7 @@ void loop() { // loop infinito
   }
 
   V = analogRead(LDRPin);         
-  ilum = ((long)V*A*10)/((long)B*Rc*(1024-V));
+  ilum = ((long)V*A*10)/((long)B*Rc*(1024-V)); //ecuacion tomada de https://aprendiendoarduino.wordpress.com/tag/ldr/
   
   //toma valores para el sensor de temperatura
   valorTermistor = analogRead(A0); //leemos el voltaje que entra al pin A0, valor de 0 a 1023
@@ -324,7 +330,12 @@ void loop() { // loop infinito
   //toma valores para el sensor de viento
   valorViento = analogRead(A14); //leemos el voltaje que entra al pin A14, valor de 0 a 1023
   vientoNormalizado = valorViento/10.23; //convertimos el valor de 10 bits (0-1023) a un valor normalizado (0%-100%)
-  vientoDisplay = round(vientoNormalizado); //se redondea para no mostrar decimales en la pantalla
+  vientoVolts = valorViento/204.6; //convertimos la velocidad del viento a un valor de voltaje de 0-5V
+  
+  vientoVelocidad = (vientoVolts)*1000/(1.525*32.4); //base de la ecuación obtenida de https://mstore.ibda3vision.com/index.php?route=product/product&product_id=365
+  vientoDisplay = vientoVelocidad;
+
+  //vientoDisplay = round(vientoNormalizado); //se redondea para no mostrar decimales en la pantalla
 
   //toma valores para el nivel de la batería
   valorBateria = analogRead(A13)-926; //leemos el voltaje que entra al pin A13, valor de 0 a 1023 -> 0 a 96
@@ -338,15 +349,15 @@ void loop() { // loop infinito
 
   //bateriaVolts = valorBateria/79.6728972; //valor entre 0 y 12.84V
 
-  //toma valores para el sensor de luz
-  valorLuz = 1;
-  luzNormalizada = 1;
-  luzDisplay = 1;
-  
   battery_low(); 
   rainCheck();
   memoryWrite();
   panelAdjust();
   serial_refresh();
   display_refresh();
+
+  //tb.sendTelemetryInt("temperature", 22);
+  //tb.sendTelemetryFloat("humidity", 42.5);
+
+  //tb.loop();
 }
