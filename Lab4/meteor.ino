@@ -57,10 +57,19 @@ int valorLluvia;
 float lluviaNormalizada;
 int lluviaDisplay;
 
-//LLUVIA
+//LUZ
 int valorLuz; 
 float luzNormalizada;
 int luzDisplay;
+
+const long A = 500;     //Resistencia en oscuridad en KΩ
+const int B = 12.5;        //Resistencia a la luz (10 Lux) en KΩ
+const int Rc = 10;       //Resistencia calibracion en KΩ
+const int LDRPin = A1;   //Pin del LDR
+int V;
+int ilum;
+
+
 
 // Variables para contar tiempo
 unsigned long startTime;
@@ -137,9 +146,9 @@ void display_refresh(){ // Se muestan los datos en la pantalla si el switch de p
       }else{
         display.println("No");
       }
-      display.print("LUZ:     ");
-      display.print(luzDisplay);
-      display.println("%"); 
+      display.print("LUZ:  ");
+      display.print(ilum);
+      display.println("LUX"); 
   }
   display.display();
   display.clearDisplay();
@@ -172,8 +181,8 @@ void serial_refresh(){ //se refresca el serial si el el switch de comm esta cerr
         Serial.println("No");
       }
       Serial.print("LUZ:");
-      Serial.print(luzDisplay);
-      Serial.println("%");
+      Serial.print(ilum);
+      Serial.println("LUX");
       timerStartEnable = 1;
     }
   }
@@ -268,7 +277,7 @@ void setup() { // se realiza el setup
 }
 
 void loop() { // loop infinito
-  
+
   if (digitalRead(comm) == HIGH){
     digitalWrite(LEDazul, LOW);
     parpadeos = 0;
@@ -298,6 +307,9 @@ void loop() { // loop infinito
       }
     }
   }
+
+  V = analogRead(LDRPin);         
+  ilum = ((long)V*A*10)/((long)B*Rc*(1024-V));
   
   //toma valores para el sensor de temperatura
   valorTermistor = analogRead(A0); //leemos el voltaje que entra al pin A0, valor de 0 a 1023
