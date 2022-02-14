@@ -168,27 +168,21 @@ void serial_refresh(){ //se refresca el serial si el el switch de comm esta cerr
       }
     currentTime = millis();
     if(currentTime - startTime >= tenMin){
-      Serial.print("BATERIA:");
       Serial.print(bateriaDisplay);
-      Serial.println("V");
-      Serial.print("TEMPERATURA:");
+      Serial.print(",");
       Serial.print(tempDisplay);
-      Serial.println(" C");
-      Serial.print("HUMEDAD:");
+      Serial.print(",");
       Serial.print(humedadDisplay);
-      Serial.println("%");
-      Serial.print("VIENTO:");
+      Serial.print(",");
       Serial.print(vientoDisplay);
-      Serial.println("%");
-      Serial.print("LLUVIA:");
+      Serial.print(",");
       if(lluviaDisplay == 1){
-        Serial.println("Si");
+        Serial.print("Si");
       }else{
-        Serial.println("No");
+        Serial.print("No");
       }
-      Serial.print("LUZ:");
-      Serial.print(ilum);
-      Serial.println("LUX");
+      Serial.print(",");
+      Serial.println(ilum);
       timerStartEnable = 1;
     }
   }
@@ -229,7 +223,6 @@ void memoryWrite(){
     memoryVerify();
     EEPROM.write(addr, tempDisplay);
     ++addr;
-    Serial.println("poo");
     
     memoryVerify();
     EEPROM.write(addr, humedadDisplay);
