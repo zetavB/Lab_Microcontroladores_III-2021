@@ -29,16 +29,18 @@ char CLAVE_MAESTRA[5] = "1234";
 byte INDICE = 0;
 int compDisplay = 2;
 int teclaDisplay = 0;
+int ALARM_ON = 0;
 
-//definición de pines
+//definicion de pines
 const int comm=12;
 const int door = 53;
 const int doorLED = 52;
 const int window = 51;
 const int windowLED = 50;
 const int movementLED = 48;
+const int alarmSound = 46;
 
-//sensor ultrasónico
+//sensor ultrasonico
 int trig = 3;
 int echo = 2;
 int dist = 0;
@@ -79,6 +81,15 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
+void movement_detected(){
+  if (dist < 100){
+    digitalWrite(movementLED, HIGH);
+  }
+  else{
+    digitalWrite(movementLED, LOW);
+  }
+}
+
 void window_open(){
   if (digitalRead(window) == HIGH){
     windowState = 1;
@@ -93,15 +104,6 @@ void window_open(){
   else{
     windowState = 0;
     digitalWrite(windowLED, LOW);
-  }
-}
-
-void movement_detected(){
-  if (dist < 100){
-    digitalWrite(movementLED, HIGH);
-  }
-  else{
-    digitalWrite(movementLED, LOW);
   }
 }
 
@@ -122,9 +124,18 @@ void door_open(){
   }
 }
 
-void trigger() {
+void soundAlert(){
+  if ((doorState == 1) | windowState == 1){
+    digitalWrite(alarmSound, HIGH);
+  }
+  else{
+    digitalWrite(alarmSound, LOW);
+  }
+}
+
+void trigger(){
   digitalWrite(trig, HIGH);
-  delayMicroseconds(10);          //Enviamos un pulso de 10us
+  delayMicroseconds(10); //Enviamos un pulso de 10us
   digitalWrite(trig, LOW);
 }
 
@@ -136,31 +147,50 @@ float calcular_distancia(){
   return dround;
 }
 
-void display_refresh(){ // Se refrescan los datos en la pantalla con los resultados más recientes
+void display_refresh(){ // Se refrescan los datos en la pantalla con los resultados mas recientes
   display.setCursor(0,0);
   display.print("Pass: ");
   display.print(CLAVE);
   display.println("");
+  
   display.print("Check: ");
 
   if (compDisplay == 1){
-    display.println("Correcta");
+    display.println("Correct");
+    display.print("Alarm: ");
+
+    if (ALARM_ON == 1){
+      display.print("ON");
+    }
+    else{
+      display.print("OFF");
+    }
+    
   }
   else if(compDisplay == 0){
-    display.println("Incorrecta");
+    display.println("wrong");
+    display.print("Alarm: ");
+
+    if (ALARM_ON == 1){
+      display.print("ON");
+    }
+    else{
+      display.print("OFF");
+    }
+
   }
   else{
     display.println("Waiting");
+    display.println("Alarm: OFF");
+    
   }
   display.println("");
-  display.print("Distance: ");
-  display.print(dist);
-  display.println("");
+
   display.display();
   display.clearDisplay();
 }
 
-void serial_refresh(){ //Si la comunicación está activada, se envian los datos
+void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
   if(digitalRead(comm) == LOW){
     Serial.print("BATERIA:");
     Serial.print(bateriaDisplay);
@@ -187,14 +217,17 @@ void lock(int door){
 void setup() {
   Serial.begin(9600);
 
+  for (int i = 0; i < 4; ++i){ //llenamos CLAVE con asteriscos
+    CLAVE[i] = '*';
+  }
 
-  //inicialización de pantalla
+  //inicializacion de pantalla
   Serial.println("PCD test");
   display.begin();
   display.setContrast(75);
   display.display(); // show splashscreen
   delay(500);
-  display.clearDisplay();   // clears the screen and buffer
+  display.clearDisplay(); // clears the screen and buffer
   display.setTextSize(1);
   display.setTextColor(BLACK);
 
@@ -202,6 +235,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(doorLED, OUTPUT);
   pinMode(windowLED, OUTPUT);
+  pinMode(alarmSound, OUTPUT);
   pinMode(trig,OUTPUT);
   pinMode(echo,INPUT);
   pinMode(comm, INPUT);
@@ -210,24 +244,39 @@ void setup() {
   lockFront.attach(8, 1000, 2000);
   lockBack.attach(9, 1000, 2000);
 
-  digitalWrite(trig, LOW);//Inicializamos el pin con 0
+  digitalWrite(trig, LOW);// Inicializamos el pin con 0
 }
 
 void loop() { // loop infinito
 
-  TECLA = teclado.getKey();   // obtiene tecla presionada y asigna a variable
+  TECLA = teclado.getKey(); // obtiene tecla presionada y asigna a variable
 
-  if (TECLA){        // comprueba que se haya presionado una tecla
-    CLAVE[INDICE] = TECLA;    // almacena en array la tecla presionada
-    INDICE++;       // incrementa indice en uno
+  if (TECLA){ // comprueba que se haya presionado una tecla
+    CLAVE[INDICE] = TECLA; // almacena en array la tecla presionada
+    INDICE++; // incrementa indice en uno
   }
 
-  if(INDICE == 4){       //si ya se almacenaron los 4 digitos
-    if(!strcmp(CLAVE, CLAVE_MAESTRA)){   // compara clave ingresada con clave maestra
-     compDisplay = 1;  // imprime en monitor serial que es correcta la clave
+  if(INDICE == 4){ // si ya se almacenaron los 4 digitos
+
+    if(!strcmp(CLAVE, CLAVE_MAESTRA)){ // compara clave ingresada con clave maestra
+      compDisplay = 1;  // imprime en pantalla que es correcta la clave
+      
+      if (ALARM_ON == 1){ //si la pass es correcta, se cambia de estado a la alarma
+        ALARM_ON = 0;
+      }
+      else{
+         ALARM_ON = 1;
+      }
+      
+      for (int i = 0; i < 4; ++i){ //llenamos con asteriscos la clave de nuevo
+        CLAVE[i] = '*'; 
+      }
     }
     else{
-      compDisplay = 0;  // imprime en monitor serial que es incorrecta la clave
+      for (int i = 0; i < 4; ++i){
+        CLAVE[i] = '*';
+      }
+      compDisplay = 0;  // imprime en pantalla que es incorrecta la clave
     }
     INDICE = 0;
   }
@@ -235,10 +284,19 @@ void loop() { // loop infinito
   trigger();
   dist = calcular_distancia();
   movement_detected();
-  door_open();
-  window_open();
-
-  //funcion de keypad para abrir y cerrar locksw
+  
+  if (ALARM_ON == 1){
+    door_open();
+    window_open();
+    soundAlert();
+  }
+  else{
+    digitalWrite(doorLED, LOW);
+    digitalWrite(windowLED, LOW);
+    digitalWrite(alarmSound, LOW);
+  }
+  
+  // funcion de keypad para abrir y cerrar locksw
   lock(1);
   lock(2);
   //delay(1000);
