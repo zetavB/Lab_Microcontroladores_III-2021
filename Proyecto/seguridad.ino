@@ -4,6 +4,31 @@
 #include <util/delay.h>
 #include <math.h>
 #include <stdio.h>
+#include <Keypad.h>
+
+
+//TECLADO
+const byte ROWS = 4; //4 filas
+const byte COLS = 3; //3 columnas
+
+char keys[ROWS][COLS] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
+};
+
+byte rowPins[ROWS] = {49, 47, 45, 43}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {31, 33, 41}; //connect to the column pinouts of the keypad
+
+Keypad teclado = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+char TECLA;
+char CLAVE[5];
+char CLAVE_MAESTRA[5] = "1234";
+byte INDICE = 0;
+int compDisplay = 2;
+int teclaDisplay = 0;
 
 //definición de pines
 const int comm=12;
@@ -113,11 +138,20 @@ float calcular_distancia(){
 
 void display_refresh(){ // Se refrescan los datos en la pantalla con los resultados más recientes
   display.setCursor(0,0);
-  display.print("Door open:   ");
-  display.print(doorState);
+  display.print("Pass: ");
+  display.print(CLAVE);
   display.println("");
-  display.print("Window open: ");
-  display.print(windowState);
+  display.print("Check: ");
+
+  if (compDisplay == 1){
+    display.println("Correcta");
+  }
+  else if(compDisplay == 0){
+    display.println("Incorrecta");
+  }
+  else{
+    display.println("Waiting");
+  }
   display.println("");
   display.print("Distance: ");
   display.print(dist);
@@ -153,6 +187,7 @@ void lock(int door){
 void setup() {
   Serial.begin(9600);
 
+
   //inicialización de pantalla
   Serial.println("PCD test");
   display.begin();
@@ -180,18 +215,36 @@ void setup() {
 
 void loop() { // loop infinito
 
+  TECLA = teclado.getKey();   // obtiene tecla presionada y asigna a variable
+
+  if (TECLA){        // comprueba que se haya presionado una tecla
+    CLAVE[INDICE] = TECLA;    // almacena en array la tecla presionada
+    INDICE++;       // incrementa indice en uno
+  }
+
+  if(INDICE == 4){       //si ya se almacenaron los 4 digitos
+    if(!strcmp(CLAVE, CLAVE_MAESTRA)){   // compara clave ingresada con clave maestra
+     compDisplay = 1;  // imprime en monitor serial que es correcta la clave
+    }
+    else{
+      compDisplay = 0;  // imprime en monitor serial que es incorrecta la clave
+    }
+    INDICE = 0;
+  }
+
   trigger();
   dist = calcular_distancia();
   movement_detected();
   door_open();
   window_open();
-  //funcion de keypad para abrir y cerrar locks
+
+  //funcion de keypad para abrir y cerrar locksw
   lock(1);
   lock(2);
-  delay(1000);
+  //delay(1000);
   unlock(1);
   unlock(2);
-  delay(1000);
+  //delay(1000);
   serial_refresh();
   display_refresh();
 
