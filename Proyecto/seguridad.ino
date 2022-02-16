@@ -263,9 +263,13 @@ void loop() { // loop infinito
       
       if (ALARM_ON == 1){ //si la pass es correcta, se cambia de estado a la alarma
         ALARM_ON = 0;
+        unlock(1);
+        unlock(2);
       }
       else{
          ALARM_ON = 1;
+         lock(1);
+         lock(2);
       }
       
       for (int i = 0; i < 4; ++i){ //llenamos con asteriscos la clave de nuevo
@@ -297,11 +301,11 @@ void loop() { // loop infinito
   }
   
   // funcion de keypad para abrir y cerrar locksw
-  lock(1);
-  lock(2);
+  //lock(1);
+  //lock(2);
   //delay(1000);
-  unlock(1);
-  unlock(2);
+  //unlock(1);
+  //unlock(2);
   //delay(1000);
   serial_refresh();
   display_refresh();
