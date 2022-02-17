@@ -27,7 +27,7 @@ char TECLA;
 char CLAVE[5];
 char CLAVE_MAESTRA[5] = "1234";
 byte INDICE = 0;
-int compDisplay = 2;
+int correctPassword = 2;
 int teclaDisplay = 0;
 int ALARM_ON = 0;
 
@@ -155,7 +155,7 @@ void display_refresh(){ // Se refrescan los datos en la pantalla con los resulta
   
   display.print("Check: ");
 
-  if (compDisplay == 1){
+  if (correctPassword == 1){
     display.println("Correct");
     display.print("Alarm: ");
 
@@ -167,7 +167,7 @@ void display_refresh(){ // Se refrescan los datos en la pantalla con los resulta
     }
     
   }
-  else if(compDisplay == 0){
+  else if(correctPassword == 0){
     display.println("wrong");
     display.print("Alarm: ");
 
@@ -218,7 +218,7 @@ void setup() {
   Serial.begin(9600);
 
   for (int i = 0; i < 4; ++i){ //llenamos CLAVE con asteriscos
-    CLAVE[i] = '*';
+    CLAVE[i] = '-';
   }
 
   //inicializacion de pantalla
@@ -259,7 +259,7 @@ void loop() { // loop infinito
   if(INDICE == 4){ // si ya se almacenaron los 4 digitos
 
     if(!strcmp(CLAVE, CLAVE_MAESTRA)){ // compara clave ingresada con clave maestra
-      compDisplay = 1;  // imprime en pantalla que es correcta la clave
+      correctPassword = 1;  // imprime en pantalla que es correcta la clave
       
       if (ALARM_ON == 1){ //si la pass es correcta, se cambia de estado a la alarma
         ALARM_ON = 0;
@@ -273,28 +273,31 @@ void loop() { // loop infinito
       }
       
       for (int i = 0; i < 4; ++i){ //llenamos con asteriscos la clave de nuevo
-        CLAVE[i] = '*'; 
+        CLAVE[i] = '-'; 
       }
     }
     else{
       for (int i = 0; i < 4; ++i){
-        CLAVE[i] = '*';
+        CLAVE[i] = '-';
       }
-      compDisplay = 0;  // imprime en pantalla que es incorrecta la clave
+      correctPassword = 0;  // imprime en pantalla que es incorrecta la clave
     }
     INDICE = 0;
   }
 
+
+  //seccion de servos
   trigger();
   dist = calcular_distancia();
   movement_detected();
   
+  //si la alarma esta armada, revisa si se abre window/door y hace que se active la alarma
   if (ALARM_ON == 1){
     door_open();
     window_open();
     soundAlert();
   }
-  else{
+  else{ //si la alarma esta desarmada, apaga todas las alarmas
     digitalWrite(doorLED, LOW);
     digitalWrite(windowLED, LOW);
     digitalWrite(alarmSound, LOW);
