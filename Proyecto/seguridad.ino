@@ -46,10 +46,11 @@ const int cam1 = 25;
 const int cam2 = 23;
 
 //sensor ultrasonico
-const int trig2 = 9;
-const int trig = 3;
-const int echo2 = 4;
+const int echo2 = 10;
+const int trig2 = 11;
 const int echo = 2;
+const int trig = 3;
+
 int dist = 0;
 int dist2 = 0;
 
@@ -94,16 +95,17 @@ void movement_detected(){
   if (dist > 1){
     digitalWrite(cam1, HIGH);
     movement = 1;
-  }
-  else{
+  }else{
     movement = 0;
     digitalWrite(cam1, LOW);
   }
+} 
+
+void movement_detected2(){
   if (dist2 > 1){
     digitalWrite(cam2, HIGH);
     movement2 = 1;
-  }
-  else{
+  }else{
     movement2 = 0;
     digitalWrite(cam2, LOW);
   }
@@ -112,13 +114,14 @@ void movement_detected(){
 void window_open(){
   if (digitalRead(window) == HIGH){
     windowState = 1;
-    if (flagWindow < 5){
+    digitalWrite(windowLED, HIGH);
+    /*if (flagWindow < 5){
       flagWindow++;
     }
     else{
       flagWindow = 0;
       digitalWrite(windowLED, !digitalRead(windowLED));
-    }
+    }*/
   }
   else{
     windowState = 0;
@@ -129,13 +132,14 @@ void window_open(){
 void door_open(){
   if (digitalRead(door) == HIGH){
     doorState = 1;
-    if (flagDoor < 5){
+    digitalWrite(doorLED, HIGH);
+    /*if (flagDoor < 5){
       flagDoor++;
     }
     else{
       flagDoor = 0;
       digitalWrite(doorLED, !digitalRead(doorLED));
-    }
+    }*/
   }
   else{
     doorState = 0;
@@ -156,7 +160,9 @@ void trigger(){
   digitalWrite(trig, HIGH);
   delayMicroseconds(10); //Enviamos un pulso de 10us
   digitalWrite(trig, LOW);
+}
 
+void trigger2(){
   digitalWrite(trig2, HIGH);
   delayMicroseconds(10); //Enviamos un pulso de 10us
   digitalWrite(trig2, LOW);
@@ -273,7 +279,7 @@ void isr(){
          lock(1);
          lock(2);
       }
-      for (int i = 0; i < 4; ++i){ //llenamos con asteriscos la clave de nuevo
+      for (int i = 0; i < 4; ++i){ //llenamos con guiones la clave de nuevo
         CLAVE[i] = '-'; 
       }
     }
@@ -321,7 +327,7 @@ void setup() {
   lockFront.attach(8, 1000, 2000);
   lockBack.attach(9, 1000, 2000);
 
-  digitalWrite(trig, LOW);// Inicializamos el pin con 0
+  //digitalWrite(trig, LOW);// Inicializamos el pin con 0
   digitalWrite(trig2, LOW);// Inicializamos el pin con 0
 
   //timer
@@ -334,22 +340,23 @@ void loop() { // loop infinito
 
   trigger();
   dist = calcular_distancia();
+
+  delayMicroseconds(2); //delay necesario para leer los sensores
+
+  trigger2();
   dist2 = calcular_distancia2();
   
-  //movement_detected2();
-  
-  //si la alarma esta armada, revisa si se abre window/door y hace que se active la alarma
   if (ALARM_ON == 1){
     door_open(); //revisa si se abrio una puerta
     window_open(); //revisa si se abrio una ventana
-    movement_detected(); //revisa si se detecto algun movimiento en el sensor ultrasonico
+    movement_detected(); //revisa si hubo movimiento cerca de la cam1
+    movement_detected2(); //revisa si hubo movimiento cerca de la cam2
     soundAlert(); //enciende la alarma de sonido
   }
-  else{ //si la alarma esta desarmada, apaga todas las alarmas
+  else{
     alarms_off();
   }
-  
+
   serial_refresh();
   display_refresh();
-
 }
