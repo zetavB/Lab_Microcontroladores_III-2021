@@ -264,8 +264,9 @@ void lock(int door){
 }
 
 void isr(){
+  
   TECLA = teclado.getKey();
-
+  
   if (changePassword == 1){ //si se presiono # entonces entramos en modo cambiar password
     if (TECLA){ // comprueba que se haya presionado una tecla
       CLAVE[INDICE] = TECLA;
@@ -273,11 +274,11 @@ void isr(){
       INDICE++;
     }
     if(INDICE == 4){
-      digitalWrite(cambiarPass, LOW);
       passwordChanged = 1;
       for (int i = 0; i < 4; ++i){ //llenamos con guiones la clave de nuevo
         CLAVE[i] = '-'; 
       }
+      digitalWrite(cambiarPass, LOW);
       changePassword = 0;
     }
   }

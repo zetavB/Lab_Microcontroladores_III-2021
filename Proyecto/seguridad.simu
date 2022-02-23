@@ -1,5 +1,9 @@
 <circuit noLinAcc="3" animate="0" Speed_sps="1000000" Simu_Step_nS="1000" type="simulide_0.4" Speed_per="100" reactStep="40">
 
+Unique  Id: TextComponent-6341: 
+Circuit Id: TextComponent-4616
+<item labelx="-16" Opacity="1" Margin="2" valLabelx="0" mainComp="false" itemtype="TextComponent" circPos="0,0" valLabRot="0" labely="-24" vflip="1" valLabely="0" x="-28" labelrot="0" rotation="0" boardPos="-1e+06,-1e+06" Font="Helvetica [Cronyx]" Show_id="false" boardRot="-1e+06" Fixed_Width="false" id="TextComponent-4616" circRot="6.45086817599e-312" objectName="TextComponent-6341" hflip="1" y="-824" Font_Size="12" Text="presione #*#* &#xa;para cambiar &#xa;la contraseña" Border="1"/>
+
 Unique  Id: Resistor-6337: 
 Circuit Id: Resistor-5238
 <item labelx="-12" Unit=" Ω" valLabelx="-10" mainComp="false" itemtype="Resistor" Show_res="true" circPos="0,0" valLabRot="0" labely="-20" vflip="1" valLabely="4" Resistance="180" x="224" labelrot="0" rotation="-90" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Resistor-5238" circRot="9.442881271945e-312" objectName="Resistor-6337" hflip="1" y="-576"/>
