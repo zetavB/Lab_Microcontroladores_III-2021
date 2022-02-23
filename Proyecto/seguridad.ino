@@ -27,6 +27,7 @@ Keypad teclado = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 char TECLA;
 char CLAVE[5];
 char CLAVE_MAESTRA[5] = "1234";
+char CLAVE_CAMBIAR[5] = "#*#*";
 byte INDICE = 0;
 int correctPassword = 2;
 int teclaDisplay = 0;
@@ -44,6 +45,9 @@ const int movementLED = 48;
 const int alarmSound = 46;
 const int cam1 = 25;
 const int cam2 = 23;
+const int cambiarPass = 27;
+int changePassword = 0;
+int passwordChanged = 1;
 
 //sensor ultrasonico
 const int echo2 = 10;
@@ -262,34 +266,64 @@ void lock(int door){
 void isr(){
   TECLA = teclado.getKey();
 
-  if (TECLA){ // comprueba que se haya presionado una tecla
-    CLAVE[INDICE] = TECLA; // almacena en array la tecla presionada
-    INDICE++; // incrementa indice en uno
-  }
-  if(INDICE == 4){ // si ya se almacenaron los 4 digitos
-    if(!strcmp(CLAVE, CLAVE_MAESTRA)){ // compara clave ingresada con clave maestra
-      correctPassword = 1;  // imprime en pantalla que es correcta la clave
-      if (ALARM_ON == 1){ //si la pass es correcta, se cambia de estado a la alarma
-        ALARM_ON = 0;
-        unlock(1);
-        unlock(2);
-      }
-      else{
-         ALARM_ON = 1;
-         lock(1);
-         lock(2);
-      }
+  if (changePassword == 1){ //si se presiono # entonces entramos en modo cambiar password
+    if (TECLA){ // comprueba que se haya presionado una tecla
+      CLAVE[INDICE] = TECLA;
+      CLAVE_MAESTRA[INDICE] = TECLA;
+      INDICE++;
+    }
+    if(INDICE == 4){
+      digitalWrite(cambiarPass, LOW);
+      passwordChanged = 1;
       for (int i = 0; i < 4; ++i){ //llenamos con guiones la clave de nuevo
         CLAVE[i] = '-'; 
       }
+      changePassword = 0;
     }
-    else{
-      for (int i = 0; i < 4; ++i){
-        CLAVE[i] = '-';
+  }
+
+  else if (changePassword == 0){
+    if (TECLA){ // comprueba que se haya presionado una tecla
+      CLAVE[INDICE] = TECLA; // almacena en array la tecla presionada
+      if (!strcmp(CLAVE, CLAVE_CAMBIAR)){
+        INDICE = 0;
+        for (int i = 0; i < 4; ++i){ //llenamos con guiones la clave de nuevo
+          CLAVE[i] = '-'; 
+        }
+        digitalWrite(cambiarPass, HIGH);
+        changePassword = 1;
       }
-      correctPassword = 0;  // imprime en pantalla que es incorrecta la clave
+      else{
+        digitalWrite(cambiarPass, LOW);
+        INDICE++; // incrementa indice en uno
+      }
+      
     }
-    INDICE = 0;
+    if(INDICE == 4){ // si ya se almacenaron los 4 digitos
+      if(!strcmp(CLAVE, CLAVE_MAESTRA)){ // compara clave ingresada con clave maestra
+        correctPassword = 1;  // imprime en pantalla que es correcta la clave
+        if (ALARM_ON == 1){ //si la pass es correcta, se cambia de estado a la alarma
+          ALARM_ON = 0;
+          unlock(1);
+          unlock(2);
+        }
+        else{
+          ALARM_ON = 1;
+          lock(1);
+          lock(2);
+        }
+        for (int i = 0; i < 4; ++i){ //llenamos con guiones la clave de nuevo
+          CLAVE[i] = '-'; 
+        }
+      }
+      else{
+        for (int i = 0; i < 4; ++i){
+          CLAVE[i] = '-';
+        }
+        correctPassword = 0;  // imprime en pantalla que es incorrecta la clave
+      }
+      INDICE = 0;
+    }
   }
 }
 
@@ -319,6 +353,8 @@ void setup() {
   pinMode(cam2, OUTPUT);
   pinMode(trig,OUTPUT);
   pinMode(trig2,OUTPUT);
+  pinMode(cambiarPass,OUTPUT);
+
   pinMode(echo,INPUT);
   pinMode(echo2,INPUT);
   pinMode(comm, INPUT);

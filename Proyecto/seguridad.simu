@@ -1,5 +1,17 @@
 <circuit noLinAcc="3" animate="0" Speed_sps="1000000" Simu_Step_nS="1000" type="simulide_0.4" Speed_per="100" reactStep="40">
 
+Unique  Id: Resistor-6337: 
+Circuit Id: Resistor-5238
+<item labelx="-12" Unit=" Ω" valLabelx="-10" mainComp="false" itemtype="Resistor" Show_res="true" circPos="0,0" valLabRot="0" labely="-20" vflip="1" valLabely="4" Resistance="180" x="224" labelrot="0" rotation="-90" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Resistor-5238" circRot="9.442881271945e-312" objectName="Resistor-6337" hflip="1" y="-576"/>
+
+Unique  Id: Led-6336: 
+Circuit Id: Led-5535
+<item Grounded="false" labelx="-16" valLabelx="0" mainComp="false" itemtype="Led" circPos="0,0" valLabRot="0" labely="-24" Color="0" vflip="1" valLabely="0" Resistance="0.6" x="224" MaxCurrent="0.03" labelrot="0" rotation="-90" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Led-5535" circRot="-5.486573998259692e+303" objectName="Led-6336" Threshold="2.4" hflip="1" y="-604"/>
+
+Unique  Id: Ground-6335: 
+Circuit Id: Ground-5244
+<item labelx="-16" valLabelx="0" mainComp="false" itemtype="Ground" circPos="0,0" valLabRot="0" labely="8" vflip="1" valLabely="0" x="224" labelrot="0" rotation="-180" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Ground-5244" circRot="2.1219957905e-314" objectName="Ground-6335" hflip="1" y="-632"/>
+
 Unique  Id: WaveGen-5991: 
 Circuit Id: WaveGen-5991
 <item labelx="-64" Unit=" V" Out="false" valLabelx="-16" mainComp="false" itemtype="WaveGen" Always_On="false" Freq="1000" circPos="0,0" Show_Volt="true" Quality="5" valLabRot="0" labely="-24" vflip="1" valLabely="8" x="512" Voltage="12" labelrot="0" Wave_Type="0" rotation="90" boardPos="-1e+06,-1e+06" Duty_Square="50" Show_id="false" boardRot="-1e+06" id="WaveGen-5991" Volt_Base="0" circRot="0" objectName="WaveGen-5991" hflip="1" y="-728"/>
@@ -639,5 +651,17 @@ Circuit Id: Connector-6275
 Unique  Id: Connector-6334: 
 Circuit Id: Connector-6334
 <item labelx="-16" endpinid="Arduino Mega-5387-PE5" valLabelx="0" mainComp="false" itemtype="Connector" enodeid="enode-6334" circPos="0,0" startpinid="SR04-5599-trigpin" valLabRot="0" labely="-24" vflip="1" valLabely="0" x="88" labelrot="0" rotation="0" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Connector-6334" circRot="6.036541169051605e-270" pointList="88,-500,88,-424,200,-424" objectName="Connector-6334" hflip="1" y="-500"/>
+
+Unique  Id: Connector-6338: 
+Circuit Id: Connector-6338
+<item labelx="-16" endpinid="Ground-6335-Gnd" valLabelx="0" mainComp="false" itemtype="Connector" enodeid="enode-6338" circPos="0,0" startpinid="Led-6336-rPin" valLabRot="0" labely="-24" vflip="1" valLabely="0" x="224" labelrot="0" rotation="0" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Connector-6338" circRot="6.036541169051605e-270" pointList="224,-620,224,-616" objectName="Connector-6338" hflip="1" y="-620"/>
+
+Unique  Id: Connector-6339: 
+Circuit Id: Connector-6339
+<item labelx="-16" endpinid="Led-6336-lPin" valLabelx="0" mainComp="false" itemtype="Connector" enodeid="enode-6339" circPos="0,0" startpinid="Resistor-6337-rPin" valLabRot="0" labely="-24" vflip="1" valLabely="0" x="224" labelrot="0" rotation="0" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Connector-6339" circRot="-5.486129280331905e+303" pointList="224,-592,224,-588" objectName="Connector-6339" hflip="1" y="-592"/>
+
+Unique  Id: Connector-6340: 
+Circuit Id: Connector-6340
+<item labelx="-16" endpinid="Arduino Mega-5387-PA5" valLabelx="0" mainComp="false" itemtype="Connector" enodeid="enode-6340" circPos="0,0" startpinid="Resistor-6337-lPin" valLabRot="0" labely="-24" vflip="1" valLabely="0" x="224" labelrot="0" rotation="0" boardPos="-1e+06,-1e+06" Show_id="false" boardRot="-1e+06" id="Connector-6340" circRot="6.036541169051605e-270" pointList="224,-560,224,-552" objectName="Connector-6340" hflip="1" y="-560"/>
  
 </circuit>
