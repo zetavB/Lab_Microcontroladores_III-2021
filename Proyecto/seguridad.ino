@@ -190,45 +190,53 @@ float calcular_distancia2(){
 
 void display_refresh(){ // Se refrescan los datos en la pantalla con los resultados mas recientes
   display.setCursor(0,0);
-  display.print("Pass: ");
-  display.print(CLAVE);
-  display.println("");
+
   
-  display.print("Check: ");
+  if ((changePassword == 1) & (ALARM_ON == 0)){
+    display.println("Type your new");
+    display.print("pass: ");
+    display.print(CLAVE);
+    display.println("");
+  }
 
-  if (correctPassword == 1){
-    display.println("Correct");
-    display.print("Alarm: ");
+  else if (changePassword == 0){
+    display.print("Pass: ");
+    display.print(CLAVE);
+    display.println("");
+    display.print("Check: ");
 
-    if (ALARM_ON == 1){
-      display.print("ON");
+    if (correctPassword == 1){
+      display.println("Correct");
+      display.print("Alarm: ");
+
+      if (ALARM_ON == 1){
+        display.print("ON");
+      }
+      else{
+        display.print("OFF");
+      }
+    }
+    else if(correctPassword == 0){
+      display.println("wrong");
+      display.print("Alarm: ");
+
+      if (ALARM_ON == 1){
+        display.print("ON");
+      }
+      else{
+        display.print("OFF");
+      }
     }
     else{
-      display.print("OFF");
-    }
+      display.println("Waiting");
+      display.println("Alarm: OFF");
     
-  }
-  else if(correctPassword == 0){
-    display.println("wrong");
-    display.print("Alarm: ");
-
-    if (ALARM_ON == 1){
-      display.print("ON");
     }
-    else{
-      display.print("OFF");
-    }
-
+    display.println("");
   }
-  else{
-    display.println("Waiting");
-    display.println("Alarm: OFF");
-    
-  }
-  display.println("");
-
   display.display();
   display.clearDisplay();
+
 }
 
 void alarms_off(){
@@ -267,7 +275,7 @@ void isr(){
   
   TECLA = teclado.getKey();
   
-  if (changePassword == 1){ //si se presiono # entonces entramos en modo cambiar password
+  if ((changePassword == 1) & (ALARM_ON == 0)){ 
     if (TECLA){ // comprueba que se haya presionado una tecla
       CLAVE[INDICE] = TECLA;
       CLAVE_MAESTRA[INDICE] = TECLA;
@@ -275,15 +283,21 @@ void isr(){
     }
     if(INDICE == 4){
       passwordChanged = 1;
+      changePassword = 0;
+      digitalWrite(cambiarPass, LOW);
       for (int i = 0; i < 4; ++i){ //llenamos con guiones la clave de nuevo
         CLAVE[i] = '-'; 
       }
-      digitalWrite(cambiarPass, LOW);
-      changePassword = 0;
     }
   }
-
+  else if ((changePassword == 1) & (ALARM_ON == 1)){
+    passwordChanged = 0;
+    correctPassword = 0;
+    changePassword = 0;
+    digitalWrite(cambiarPass, LOW);
+  }
   else if (changePassword == 0){
+    passwordChanged = 0;
     if (TECLA){ // comprueba que se haya presionado una tecla
       CLAVE[INDICE] = TECLA; // almacena en array la tecla presionada
       if (!strcmp(CLAVE, CLAVE_CAMBIAR)){
