@@ -87,6 +87,13 @@ int flagDoor = 0;
 Servo lockFront;
 Servo lockBack;
 
+// Detector de cambios para serial
+int pastRun[8];
+int currentRun[8];
+
+// Senal recibida por serial
+int locker;
+
 
 void blink(){ //parpadea el led integrado
   digitalWrite(LED_BUILTIN, HIGH);
@@ -247,11 +254,113 @@ void alarms_off(){
   digitalWrite(cam2, LOW);
 }
 
+bool areEqual(){
+  for (int i = 0; i < 8; i++){
+    if (currentRun[i] != pastRun[i]){
+      return true;
+      }
+  }
+  return false;
+}
+
 void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
+  locker = Serial.read();
+  if(locker == 49){
+    lock(1);
+    lock(2);
+  }
   if(digitalRead(comm) == LOW){
-    Serial.print("BATERIA:");
-    Serial.print(bateriaDisplay);
-    Serial.println("%");
+    //Status de alarma
+      currentRun[0] = ALARM_ON;
+      
+      //Status de alarma activada
+      if ((doorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
+        currentRun[1] = 1;
+      }else{
+        currentRun[1] = 0;
+      }
+      
+      //Status de puerta
+      currentRun[2] = doorState;
+      
+      //Condicion de lock de puerta frontal
+      if(lockFront.read() >= 140){
+        currentRun[3] = 1;
+      }else{
+        currentRun[3] = 0;
+      }
+      
+      //Condicion de lock de puerta trasera
+      if(lockBack.read() >= 140){
+        currentRun[4] = 1;
+      }else{
+        currentRun[4] = 0;
+      }
+      
+      //Status de ventana
+      currentRun[5] = windowState;
+      
+      //Status de sensor movimiento 1
+      currentRun[6] = movement;
+      
+      //Status de sensor movimiento 2
+      currentRun[7] = movement2;
+
+    if(areEqual()){
+      //Status de alarma
+      Serial.print(ALARM_ON);
+      pastRun[0] = ALARM_ON;
+      Serial.print(",");
+      
+      //Status de alarma activada
+      if ((doorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
+        Serial.print("1");
+        pastRun[1] = 1;
+      }else{
+        Serial.print("0");
+        pastRun[1] = 0;
+      }
+      Serial.print(",");
+      
+      //Status de puerta
+      Serial.print(doorState);
+      pastRun[2] = doorState;
+      Serial.print(",");
+      
+      //Condicion de lock de puerta frontal
+      if(lockFront.read() >= 140){
+        Serial.print("1");
+        pastRun[3] = 1;
+      }else{
+        Serial.print("0");
+        pastRun[3] = 0;
+      }
+      Serial.print(",");
+      
+      //Condicion de lock de puerta trasera
+      if(lockBack.read() >= 140){
+        Serial.print("1");
+        pastRun[4] = 1;
+      }else{
+        Serial.print("0");
+        pastRun[4] = 0;
+      }
+      Serial.print(",");
+      
+      //Status de ventana
+      Serial.print(windowState);
+      pastRun[5] = windowState;
+      Serial.print(",");
+      
+      //Status de sensor movimiento 1
+      Serial.print(movement);
+      pastRun[6] = movement;
+      Serial.print(",");
+      
+      //Status de sensor movimiento 2
+      Serial.println(movement2);
+      pastRun[7] = movement2;
+    }
   }
 }
 
@@ -344,7 +453,10 @@ void isr(){
 
 void setup() {
   Serial.begin(9600);
-
+  for(int i =0;i<8;i++){
+    pastRun[i] = 0;
+  }
+  
   for (int i = 0; i < 4; ++i){ //llenamos CLAVE con guiones
     CLAVE[i] = '-';
   }
