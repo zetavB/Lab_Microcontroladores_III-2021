@@ -45,7 +45,7 @@ time.sleep(3)
 
 client.loop_start()
 data=dict()
-for i in range(10):
+for i in range(100):
 	
 	valor = PuertoSerial.readline().decode().split(',')
 
