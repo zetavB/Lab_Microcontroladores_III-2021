@@ -37,8 +37,10 @@ int movement2 = 0;
 
 //definicion de pines
 const int comm=12;
-const int door = 53;
-const int doorLED = 52;
+const int frontDoor = 53;
+const int backDoor = 44;
+const int frontDoorLED = 52;
+const int backDoorLED = 48;
 const int window = 51;
 const int windowLED = 50;
 const int movementLED = 48;
@@ -66,7 +68,8 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
 #define DELTAY 2
 
 //PUERTA
-int doorState = 0;
+int frontDoorState = 0;
+int backDoorState = 0;
 int windowState = 0;
 
 //BATERIA
@@ -102,7 +105,7 @@ void blink(){ //parpadea el led integrado
   delay(300);
 }
 
-void movement_detected(){
+void movement_detected(){ //camera number 1
   if (dist > 1){
     digitalWrite(cam1, HIGH);
     movement = 1;
@@ -112,7 +115,7 @@ void movement_detected(){
   }
 } 
 
-void movement_detected2(){
+void movement_detected2(){ //camera number 2
   if (dist2 > 1){
     digitalWrite(cam2, HIGH);
     movement2 = 1;
@@ -140,26 +143,30 @@ void window_open(){
   }
 }
 
-void door_open(){
-  if (digitalRead(door) == HIGH){
-    doorState = 1;
-    digitalWrite(doorLED, HIGH);
-    /*if (flagDoor < 5){
-      flagDoor++;
-    }
-    else{
-      flagDoor = 0;
-      digitalWrite(doorLED, !digitalRead(doorLED));
-    }*/
+void front_door_open(){
+  if (digitalRead(frontDoor) == HIGH){
+    frontDoorState = 1;
+    digitalWrite(frontDoorLED, HIGH);
   }
   else{
-    doorState = 0;
-    digitalWrite(doorLED, LOW);
+    frontDoorState = 0;
+    digitalWrite(frontDoorLED, LOW);
+  }
+}
+
+void back_door_open(){
+  if (digitalRead(backDoor) == HIGH){
+    backDoorState = 1;
+    digitalWrite(backDoorLED, HIGH);
+  }
+  else{
+    backDoorState = 0;
+    digitalWrite(backDoorLED, LOW);
   }
 }
 
 void soundAlert(){
-  if ((doorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
+  if ((frontDoorState == 1) | (backDoorState == 1) | (windowState == 1) | (movement == 1) | (movement2 == 1)){
     digitalWrite(alarmSound, HIGH);
   }
   else{
@@ -247,7 +254,8 @@ void display_refresh(){ // Se refrescan los datos en la pantalla con los resulta
 }
 
 void alarms_off(){
-  digitalWrite(doorLED, LOW);
+  digitalWrite(frontDoorLED, LOW);
+  digitalWrite(backDoorLED, LOW);
   digitalWrite(windowLED, LOW);
   digitalWrite(alarmSound, LOW);
   digitalWrite(cam1, LOW);
@@ -274,14 +282,14 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
       currentRun[0] = ALARM_ON;
       
       //Status de alarma activada
-      if ((doorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
+      if ((frontDoorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
         currentRun[1] = 1;
       }else{
         currentRun[1] = 0;
       }
       
       //Status de puerta
-      currentRun[2] = doorState;
+      currentRun[2] = frontDoorState;
       
       //Condicion de lock de puerta frontal
       if(lockFront.read() >= 140){
@@ -313,7 +321,7 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
       Serial.print(",");
       
       //Status de alarma activada
-      if ((doorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
+      if ((frontDoorState == 1) | windowState == 1 | movement == 1 | movement2 == 1){
         Serial.print("1");
         pastRun[1] = 1;
       }else{
@@ -323,8 +331,8 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
       Serial.print(",");
       
       //Status de puerta
-      Serial.print(doorState);
-      pastRun[2] = doorState;
+      Serial.print(frontDoorState);
+      pastRun[2] = frontDoorState;
       Serial.print(",");
       
       //Condicion de lock de puerta frontal
@@ -473,7 +481,8 @@ void setup() {
 
   //configuracion de pines
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(doorLED, OUTPUT);
+  pinMode(frontDoorLED, OUTPUT);
+  pinMode(backDoorLED, OUTPUT);
   pinMode(windowLED, OUTPUT);
   pinMode(alarmSound, OUTPUT);
   pinMode(cam1, OUTPUT);
@@ -510,7 +519,8 @@ void loop() { // loop infinito
   dist2 = calcular_distancia2();
   
   if (ALARM_ON == 1){
-    door_open(); //revisa si se abrio una puerta
+    front_door_open(); //revisa si se abrio una puerta
+    back_door_open(); //revisa si se abrio una puerta
     window_open(); //revisa si se abrio una ventana
     movement_detected(); //revisa si hubo movimiento cerca de la cam1
     movement_detected2(); //revisa si hubo movimiento cerca de la cam2
