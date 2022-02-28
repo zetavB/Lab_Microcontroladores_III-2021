@@ -7,8 +7,12 @@
 #include <Keypad.h>
 #include <TimerOne.h>
 
+//definicion de pines generales
+const int comm = 12;
+const int alarmSound = 46;
 
 //TECLADO
+char TECLA;
 const byte ROWS = 4; //4 filas
 const byte COLS = 3; //3 columnas
 
@@ -21,44 +25,36 @@ char keys[ROWS][COLS] = {
 
 byte rowPins[ROWS] = {49, 47, 45, 43}; //connect to the row pinouts of the keypad
 byte colPins[COLS] = {31, 33, 41}; //connect to the column pinouts of the keypad
-
 Keypad teclado = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-char TECLA;
+byte INDICE = 0;
+int teclaDisplay = 0;
+int ALARM_ON = 0;
+
+//PASSWORD
 char CLAVE[5];
 char CLAVE_MAESTRA[5] = "1234";
 char CLAVE_CAMBIAR[5] = "#*#*";
-byte INDICE = 0;
 int correctPassword = 2;
-int teclaDisplay = 0;
-int ALARM_ON = 0;
-int movement = 0;
-int movement2 = 0;
-
-//definicion de pines
-const int comm=12;
-const int frontDoor = 53;
-const int backDoor = 44;
-const int frontDoorLED = 52;
-const int backDoorLED = 48;
-const int window = 51;
-const int windowLED = 50;
-const int movementLED = 48;
-const int alarmSound = 46;
-const int cam1 = 25;
-const int cam2 = 23;
 const int cambiarPass = 27;
 int changePassword = 0;
 int passwordChanged = 1;
 
 //sensor ultrasonico
-const int echo2 = 10;
-const int trig2 = 11;
 const int echo = 2;
 const int trig = 3;
 
+const int echo2 = 10;
+const int trig2 = 11;
+
 int dist = 0;
 int dist2 = 0;
+
+const int cam1 = 25;
+const int cam2 = 23;
+
+int movement = 0;
+int movement2 = 0;
 
 // definimos LCD
 Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
@@ -67,24 +63,25 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 5, 6, 4, 8);
 #define YPOS 1
 #define DELTAY 2
 
-//PUERTA
+//front door
+const int frontDoor = 53;
+const int frontDoorLED = 52;
 int frontDoorState = 0;
-int backDoorState = 0;
-int windowState = 0;
 
-//BATERIA
-int valorBateria; 
-float bateriaNormalizada;
-int bateriaDisplay;
+//back door
+const int backDoor = 44;
+const int backDoorLED = 48;
+int backDoorState = 0;
+
+//window
+int windowState = 0;
+const int window = 51;
+const int windowLED = 50;
 
 //CONTADORES PARA EL PARPADEO DEL LED de comm
 int contador = 0;
 int contador2 = 0;
 int parpadeos = 0;
-
-//Flags para que parpadeen los leds de ventana/puerta abierta
-int flagWindow = 0;
-int flagDoor = 0;
 
 //Servos de puertas
 Servo lockFront;
@@ -129,13 +126,6 @@ void window_open(){
   if (digitalRead(window) == HIGH){
     windowState = 1;
     digitalWrite(windowLED, HIGH);
-    /*if (flagWindow < 5){
-      flagWindow++;
-    }
-    else{
-      flagWindow = 0;
-      digitalWrite(windowLED, !digitalRead(windowLED));
-    }*/
   }
   else{
     windowState = 0;
@@ -506,7 +496,6 @@ void setup() {
   Timer1.initialize(100000);//Cada cuantos us ocurre le interrupt
   Timer1.attachInterrupt(isr, 100000);
 }
-
 
 void loop() { // loop infinito
 
