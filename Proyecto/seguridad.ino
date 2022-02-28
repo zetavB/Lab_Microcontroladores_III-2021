@@ -39,6 +39,7 @@ int correctPassword = 2;
 const int cambiarPass = 27;
 int changePassword = 0;
 int passwordChanged = 1;
+int flagPass = 0;
 
 //sensor ultrasonico
 const int echo = 2;
@@ -93,7 +94,6 @@ int currentRun[9];
 
 // Senal recibida por serial
 int locker;
-
 
 void blink(){ //parpadea el led integrado
   digitalWrite(LED_BUILTIN, HIGH);
@@ -195,22 +195,26 @@ float calcular_distancia2(){
 void display_refresh(){ // Se refrescan los datos en la pantalla con los resultados mas recientes
   display.setCursor(0,0);
 
-  
   if ((changePassword == 1) & (ALARM_ON == 0)){
-    display.println("Type your new");
+    
+    display.println("CHANGING PASS");
+    display.println("");
+    display.println("");
+    display.println("Type the new");
     display.print("pass: ");
     display.print(CLAVE);
     display.println("");
   }
 
   else if (changePassword == 0){
-    display.print("Pass: ");
-    display.print(CLAVE);
-    display.println("");
-    display.print("Check: ");
 
-    if (correctPassword == 1){
-      display.println("Correct");
+    if (correctPassword == 1 & flagPass == 0){
+      display.print("CHECK: ");
+      display.println("CORRECT");
+      display.println("");
+      display.print("Pass: ");
+      display.println(CLAVE);
+      display.println("");
       display.print("Alarm: ");
 
       if (ALARM_ON == 1){
@@ -220,8 +224,13 @@ void display_refresh(){ // Se refrescan los datos en la pantalla con los resulta
         display.print("OFF");
       }
     }
-    else if(correctPassword == 0){
-      display.println("wrong");
+    else if(correctPassword == 0 & flagPass == 0){
+      display.print("CHECK: ");
+      display.println("WRONG");
+      display.println("");
+      display.print("Pass: ");
+      display.println(CLAVE);
+      display.println("");
       display.print("Alarm: ");
 
       if (ALARM_ON == 1){
@@ -230,17 +239,28 @@ void display_refresh(){ // Se refrescan los datos en la pantalla con los resulta
       else{
         display.print("OFF");
       }
+    }
+    else if (flagPass == 1){
+      display.println("CHANGES SAVED");
+      display.println("");
+      display.print("Pass: ");
+      display.println(CLAVE);
+      display.println("");
+      display.println("Alarm: OFF");
     }
     else{
-      display.println("Waiting");
+      display.print("CHECK: ");
+      display.println("WAITING");
+      display.println("");
+      display.print("Pass: ");
+      display.println(CLAVE);
+      display.println("");
       display.println("Alarm: OFF");
-    
     }
     display.println("");
   }
   display.display();
   display.clearDisplay();
-
 }
 
 void alarms_off(){
@@ -397,6 +417,8 @@ void isr(){
       INDICE++;
     }
     if(INDICE == 4){
+      INDICE = 0;
+      flagPass = 1;
       passwordChanged = 1;
       changePassword = 0;
       digitalWrite(cambiarPass, LOW);
@@ -430,6 +452,7 @@ void isr(){
       
     }
     if(INDICE == 4){ // si ya se almacenaron los 4 digitos
+      flagPass = 0;
       if(!strcmp(CLAVE, CLAVE_MAESTRA)){ // compara clave ingresada con clave maestra
         correctPassword = 1;  // imprime en pantalla que es correcta la clave
         if (ALARM_ON == 1){ //si la pass es correcta, se cambia de estado a la alarma
