@@ -329,7 +329,7 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
       Serial.print(",");
 
       //Status de puerta trasera
-      Serial.print(frontDoorState);
+      Serial.print(backDoorState);
       pastRun[3] = backDoorState;
       Serial.print(",");
       
