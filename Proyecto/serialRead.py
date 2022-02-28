@@ -52,18 +52,18 @@ for i in range(10):
 	data["Armed"]=valor[0]
 	data["Alarm"]=valor[1]
 	data["Door1"]=valor[2]
-	data["Lock1"]=valor[3]
-	data["Lock2"]=valor[4]
-	data["Window"]=valor[5]
-	data["Camera1"]=valor[6]
-	data["Camera2"]=valor[7]
+	data["Door2"]=valor[3]
+	data["Lock1"]=valor[4]
+	data["Lock2"]=valor[5]
+	data["Window"]=valor[6]
+	data["Camera1"]=valor[7]
+	data["Camera2"]=valor[8]
 	data_out = json.dumps(data)
 
 	print(valor)
 	client.publish(topic,data_out,0)
 
 	time.sleep(5)
-	#client.loop()
 client.loop_stop(force=False)
 client.disconnect()
 

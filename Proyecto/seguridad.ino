@@ -88,8 +88,8 @@ Servo lockFront;
 Servo lockBack;
 
 // Detector de cambios para serial
-int pastRun[8];
-int currentRun[8];
+int pastRun[9];
+int currentRun[9];
 
 // Senal recibida por serial
 int locker;
@@ -278,31 +278,34 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
         currentRun[1] = 0;
       }
       
-      //Status de puerta
+      //Status de puerta frontal
       currentRun[2] = frontDoorState;
+
+      //Status de puerta trasera
+      currentRun[3] = backDoorState;
       
       //Condicion de lock de puerta frontal
       if(lockFront.read() >= 140){
-        currentRun[3] = 1;
-      }else{
-        currentRun[3] = 0;
-      }
-      
-      //Condicion de lock de puerta trasera
-      if(lockBack.read() >= 140){
         currentRun[4] = 1;
       }else{
         currentRun[4] = 0;
       }
       
+      //Condicion de lock de puerta trasera
+      if(lockBack.read() >= 140){
+        currentRun[5] = 1;
+      }else{
+        currentRun[5] = 0;
+      }
+      
       //Status de ventana
-      currentRun[5] = windowState;
+      currentRun[6] = windowState;
       
       //Status de sensor movimiento 1
-      currentRun[6] = movement;
+      currentRun[7] = movement;
       
       //Status de sensor movimiento 2
-      currentRun[7] = movement2;
+      currentRun[8] = movement2;
 
     if(areEqual()){
       //Status de alarma
@@ -324,19 +327,14 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
       Serial.print(frontDoorState);
       pastRun[2] = frontDoorState;
       Serial.print(",");
+
+      //Status de puerta trasera
+      Serial.print(frontDoorState);
+      pastRun[3] = backDoorState;
+      Serial.print(",");
       
       //Condicion de lock de puerta frontal
       if(lockFront.read() >= 140){
-        Serial.print("1");
-        pastRun[3] = 1;
-      }else{
-        Serial.print("0");
-        pastRun[3] = 0;
-      }
-      Serial.print(",");
-      
-      //Condicion de lock de puerta trasera
-      if(lockBack.read() >= 140){
         Serial.print("1");
         pastRun[4] = 1;
       }else{
@@ -345,19 +343,29 @@ void serial_refresh(){ //Si la comunicacion esta activada, se envian los datos
       }
       Serial.print(",");
       
+      //Condicion de lock de puerta trasera
+      if(lockBack.read() >= 140){
+        Serial.print("1");
+        pastRun[5] = 1;
+      }else{
+        Serial.print("0");
+        pastRun[5] = 0;
+      }
+      Serial.print(",");
+      
       //Status de ventana
       Serial.print(windowState);
-      pastRun[5] = windowState;
+      pastRun[6] = windowState;
       Serial.print(",");
       
       //Status de sensor movimiento 1
       Serial.print(movement);
-      pastRun[6] = movement;
+      pastRun[7] = movement;
       Serial.print(",");
       
       //Status de sensor movimiento 2
       Serial.println(movement2);
-      pastRun[7] = movement2;
+      pastRun[8] = movement2;
     }
   }
 }
